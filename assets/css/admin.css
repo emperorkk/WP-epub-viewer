@@ -1,0 +1,11 @@
+/* Admin settings page styles */
+.wrap h1 {
+    margin-bottom: 20px;
+}
+
+.wrap code {
+    background: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 13px;
+}
