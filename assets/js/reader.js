@@ -225,6 +225,10 @@
             if (css) {
                 contents.addStylesheetCss(css, 'wpkko-skin');
             }
+            // Also apply font-size inline override for belt-and-suspenders.
+            if (self.fontSize !== 100) {
+                contents.css('font-size', self.fontSize + '%', true);
+            }
         });
 
         // Hide loading as soon as the first page renders.
@@ -328,6 +332,11 @@
         } else {
             this.applyTextColor(TEXT_COLORS[this.textColorIndex].value);
         }
+
+        // Ensure font-size override is applied if not default.
+        if (this.fontSize !== 100) {
+            this.rendition.themes.override('font-size', this.fontSize + '%', true);
+        }
     };
 
     // --- Text color ---
@@ -425,12 +434,9 @@
                 a.href = '#';
                 a.addEventListener('click', function (e) {
                     e.preventDefault();
-                    console.log('WP-kko EPUB Viewer: TOC navigate to', item.href);
-                    self.rendition.display(item.href).then(function () {
-                        console.log('WP-kko EPUB Viewer: TOC navigation success');
-                    }, function (err) {
-                        console.error('WP-kko EPUB Viewer: TOC navigation failed', err);
-                    });
+                    // Strip trailing '#' or '#' with empty fragment from TOC hrefs.
+                    var href = item.href.replace(/#$/, '');
+                    self.rendition.display(href);
                     self.elements.tocSidebar.style.display = 'none';
                 });
                 li.appendChild(a);
@@ -450,6 +456,11 @@
     EPUBReader.prototype.changeFontSize = function (delta) {
         this.fontSize = Math.max(50, Math.min(200, this.fontSize + delta));
         this._injectSkinCss();
+        // Belt-and-suspenders: also set inline body style with !important via epub.js themes.
+        if (this.rendition) {
+            this.rendition.themes.override('font-size', this.fontSize + '%', true);
+        }
+        this.showToast('Font: ' + this.fontSize + '%');
     };
 
     EPUBReader.prototype.changeSkin = function (skin) {
@@ -546,13 +557,31 @@
         var results = [];
         var spine = this.book.spine;
 
+        console.log('WP-kko EPUB Viewer: Searching for "' + query + '" across', spine.spineItems.length, 'sections');
+
+        // Show searching indicator.
+        var searching = document.createElement('li');
+        searching.textContent = 'Searching...';
+        searching.className = 'wpkko-no-results';
+        this.elements.searchResults.appendChild(searching);
+
         // Search through each section.
         // section.load() returns documentElement (an Element, not a Document).
         Promise.all(
             spine.spineItems.map(function (item) {
                 return item.load(self.book.load.bind(self.book)).then(function (el) {
-                    var text = el.textContent || '';
-                    var idx = text.toLowerCase().indexOf(query.toLowerCase());
+                    // el is documentElement — get all text from the document.
+                    var text = '';
+                    if (el && el.querySelector) {
+                        // Try to get body text first for cleaner results.
+                        var body = el.querySelector('body');
+                        text = body ? body.textContent : (el.textContent || '');
+                    } else if (el) {
+                        text = el.textContent || '';
+                    }
+                    var lowerText = text.toLowerCase();
+                    var lowerQuery = query.toLowerCase();
+                    var idx = lowerText.indexOf(lowerQuery);
                     if (idx !== -1) {
                         var excerpt = text.substring(Math.max(0, idx - 40), idx + query.length + 40);
                         results.push({
@@ -566,6 +595,10 @@
                 });
             })
         ).then(function () {
+            self.elements.searchResults.innerHTML = '';
+
+            console.log('WP-kko EPUB Viewer: Search complete, found', results.length, 'results');
+
             if (!results.length) {
                 var li = document.createElement('li');
                 li.textContent = wpkkoEpub.i18n.noResults;
