@@ -1,0 +1,231 @@
+/**
+ * WP-kko EPUB Viewer — 10 Skin Themes
+ *
+ * Each skin defines:
+ *   --wpkko-bg         : viewer background
+ *   --wpkko-toolbar-bg : toolbar background
+ *   --wpkko-text       : primary text color
+ *   --wpkko-accent     : buttons/links accent
+ *   --wpkko-panel-bg   : side-panel background
+ *   --wpkko-border     : border color
+ */
+
+/* =========================================================
+   1. Ocean Breeze (Teal & Blue)
+   ========================================================= */
+.wpkko-skin-ocean-breeze {
+    --wpkko-bg: #f0fafa;
+    --wpkko-toolbar-bg: #00838f;
+    --wpkko-text: #ffffff;
+    --wpkko-accent: #26c6da;
+    --wpkko-panel-bg: #e0f7fa;
+    --wpkko-panel-text: #004d40;
+    --wpkko-border: #b2ebf2;
+}
+
+/* =========================================================
+   2. Royal Gold (Gold & Black)
+   ========================================================= */
+.wpkko-skin-royal-gold {
+    --wpkko-bg: #1a1a1a;
+    --wpkko-toolbar-bg: #1a1a1a;
+    --wpkko-text: #ffd700;
+    --wpkko-accent: #ffab00;
+    --wpkko-panel-bg: #2a2a2a;
+    --wpkko-panel-text: #ffd700;
+    --wpkko-border: #444;
+}
+
+/* =========================================================
+   3. Berry Bloom (Pink & Purple)
+   ========================================================= */
+.wpkko-skin-berry-bloom {
+    --wpkko-bg: #fce4ec;
+    --wpkko-toolbar-bg: #880e4f;
+    --wpkko-text: #ffffff;
+    --wpkko-accent: #e040fb;
+    --wpkko-panel-bg: #f8bbd0;
+    --wpkko-panel-text: #4a0025;
+    --wpkko-border: #f48fb1;
+}
+
+/* =========================================================
+   4. Midnight (Dark Navy & Silver)
+   ========================================================= */
+.wpkko-skin-midnight {
+    --wpkko-bg: #0d1b2a;
+    --wpkko-toolbar-bg: #1b2838;
+    --wpkko-text: #c0c8d4;
+    --wpkko-accent: #90a4ae;
+    --wpkko-panel-bg: #1b2838;
+    --wpkko-panel-text: #cfd8dc;
+    --wpkko-border: #37474f;
+}
+
+/* =========================================================
+   5. Forest (Dark Green & Cream)
+   ========================================================= */
+.wpkko-skin-forest {
+    --wpkko-bg: #faf8f0;
+    --wpkko-toolbar-bg: #1b5e20;
+    --wpkko-text: #f1f1e0;
+    --wpkko-accent: #a5d6a7;
+    --wpkko-panel-bg: #e8f5e9;
+    --wpkko-panel-text: #1b5e20;
+    --wpkko-border: #c8e6c9;
+}
+
+/* =========================================================
+   6. Sunset (Orange & Dark Red)
+   ========================================================= */
+.wpkko-skin-sunset {
+    --wpkko-bg: #fff3e0;
+    --wpkko-toolbar-bg: #bf360c;
+    --wpkko-text: #ffffff;
+    --wpkko-accent: #ffab40;
+    --wpkko-panel-bg: #fbe9e7;
+    --wpkko-panel-text: #4e0000;
+    --wpkko-border: #ffccbc;
+}
+
+/* =========================================================
+   7. Arctic (White & Ice Blue)
+   ========================================================= */
+.wpkko-skin-arctic {
+    --wpkko-bg: #ffffff;
+    --wpkko-toolbar-bg: #e1f5fe;
+    --wpkko-text: #0277bd;
+    --wpkko-accent: #039be5;
+    --wpkko-panel-bg: #e1f5fe;
+    --wpkko-panel-text: #01579b;
+    --wpkko-border: #b3e5fc;
+}
+
+/* =========================================================
+   8. Charcoal (Dark Gray & Amber)
+   ========================================================= */
+.wpkko-skin-charcoal {
+    --wpkko-bg: #212121;
+    --wpkko-toolbar-bg: #303030;
+    --wpkko-text: #ffc107;
+    --wpkko-accent: #ffca28;
+    --wpkko-panel-bg: #383838;
+    --wpkko-panel-text: #fff8e1;
+    --wpkko-border: #555;
+}
+
+/* =========================================================
+   9. Lavender Dream (Lavender & Soft White)
+   ========================================================= */
+.wpkko-skin-lavender-dream {
+    --wpkko-bg: #f3e5f5;
+    --wpkko-toolbar-bg: #7b1fa2;
+    --wpkko-text: #ffffff;
+    --wpkko-accent: #ce93d8;
+    --wpkko-panel-bg: #ede7f6;
+    --wpkko-panel-text: #4a148c;
+    --wpkko-border: #d1c4e9;
+}
+
+/* =========================================================
+   10. Classic (Black & White)
+   ========================================================= */
+.wpkko-skin-classic {
+    --wpkko-bg: #ffffff;
+    --wpkko-toolbar-bg: #222222;
+    --wpkko-text: #f0f0f0;
+    --wpkko-accent: #888888;
+    --wpkko-panel-bg: #f5f5f5;
+    --wpkko-panel-text: #222222;
+    --wpkko-border: #ddd;
+}
+
+/* =========================================================
+   Apply CSS Variables to Components
+   ========================================================= */
+
+.wpkko-epub-viewer {
+    background: var(--wpkko-bg, #fff);
+    border: 1px solid var(--wpkko-border, #ddd);
+}
+
+.wpkko-toolbar {
+    background: var(--wpkko-toolbar-bg, #333);
+    color: var(--wpkko-text, #fff);
+}
+
+.wpkko-btn {
+    color: var(--wpkko-text, #fff);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.wpkko-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.wpkko-page-info {
+    color: var(--wpkko-text, #fff);
+}
+
+.wpkko-skin-switcher {
+    color: var(--wpkko-text, #fff);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.wpkko-skin-switcher option {
+    color: #333;
+    background: #fff;
+}
+
+.wpkko-toc-sidebar,
+.wpkko-search-panel,
+.wpkko-bookmarks-panel {
+    background: var(--wpkko-panel-bg, #f5f5f5);
+    color: var(--wpkko-panel-text, #333);
+}
+
+.wpkko-toc-list a,
+.wpkko-search-results a,
+.wpkko-bookmarks-list a {
+    color: var(--wpkko-panel-text, #333);
+}
+
+.wpkko-toc-list a:hover,
+.wpkko-search-results a:hover,
+.wpkko-bookmarks-list a:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.wpkko-toc-header,
+.wpkko-search-header,
+.wpkko-bookmarks-header {
+    color: var(--wpkko-panel-text, #333);
+}
+
+.wpkko-search-input {
+    color: var(--wpkko-panel-text, #333);
+    border-color: var(--wpkko-border, #ddd);
+}
+
+.wpkko-loading {
+    background: var(--wpkko-bg, #fff);
+    color: var(--wpkko-panel-text, #555);
+}
+
+.wpkko-spinner {
+    border-color: var(--wpkko-border, #ddd);
+    border-top-color: var(--wpkko-accent, #555);
+}
+
+/* Arctic / light toolbar skins need darker button borders */
+.wpkko-skin-arctic .wpkko-btn {
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.wpkko-skin-arctic .wpkko-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.wpkko-skin-arctic .wpkko-skin-switcher {
+    border-color: rgba(0, 0, 0, 0.15);
+}

@@ -1,0 +1,25 @@
+/* Gutenberg block editor styles */
+.wpkko-epub-block-preview {
+    background: #f7f7f7;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.wpkko-epub-block-icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.wpkko-epub-block-preview p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.wpkko-epub-block-skin {
+    color: #888 !important;
+    font-style: italic;
+}
