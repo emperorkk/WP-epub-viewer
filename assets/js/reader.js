@@ -125,10 +125,13 @@
             }
         });
 
-        // Search "Go" button.
-        c.querySelector('.wpkko-btn-search-go').addEventListener('click', function () {
-            self.doSearch(self.elements.searchInput.value);
-        });
+        // Search "Go" button (may not exist in cached HTML).
+        var searchGoBtn = c.querySelector('.wpkko-btn-search-go');
+        if (searchGoBtn) {
+            searchGoBtn.addEventListener('click', function () {
+                self.doSearch(self.elements.searchInput.value);
+            });
+        }
 
         // Bookmark panel — click the bookmark button to toggle.
         c.querySelector('.wpkko-btn-bookmark').addEventListener('dblclick', function () {
