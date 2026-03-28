@@ -6,6 +6,15 @@
 
     var STORAGE_PREFIX = 'wpkko_epub_';
 
+    var TEXT_COLORS = [
+        { name: 'Auto',  value: null },
+        { name: 'White', value: '#ffffff' },
+        { name: 'Black', value: '#000000' },
+        { name: 'Teal',  value: '#008080' },
+        { name: 'Red',   value: '#cc0000' },
+        { name: 'Green', value: '#228B22' }
+    ];
+
     /**
      * Initialize all viewer instances on the page.
      */
@@ -28,6 +37,7 @@
         this.bookmarks = [];
         this.book      = null;
         this.rendition = null;
+        this.textColorIndex = 0; // 0 = Auto
 
         this.elements = {
             readerArea:      container.querySelector('.wpkko-reader-area'),
@@ -101,6 +111,11 @@
             self.toggleFullscreen();
         });
 
+        // Text color cycling button.
+        c.querySelector('.wpkko-btn-text-color').addEventListener('click', function () {
+            self.cycleTextColor();
+        });
+
         // Search on enter.
         this.elements.searchInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
@@ -148,6 +163,17 @@
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     };
 
+    /**
+     * Get pixel dimensions for the reader area to avoid epub.js
+     * setting invalid CSS values from percentage-based sizing.
+     */
+    EPUBReader.prototype.getReaderDimensions = function () {
+        var rect = this.elements.readerArea.getBoundingClientRect();
+        var w = Math.floor(rect.width) || 600;
+        var h = Math.floor(rect.height) || 400;
+        return { width: w, height: h };
+    };
+
     EPUBReader.prototype.loadBook = function () {
         var self = this;
 
@@ -159,12 +185,27 @@
 
         console.log('WP-kko EPUB Viewer: Loading book from', this.src);
 
+        var dims = this.getReaderDimensions();
+
         this.book = ePub(this.src, { openAs: 'epub' });
         this.rendition = this.book.renderTo(this.elements.readerArea, {
-            width:  '100%',
-            height: '100%',
+            width:  dims.width + 'px',
+            height: dims.height + 'px',
             spread: 'auto'
         });
+
+        // Resize rendition when the container resizes.
+        var resizeTimer;
+        var ro = new ResizeObserver(function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                if (self.rendition) {
+                    var d = self.getReaderDimensions();
+                    self.rendition.resize(d.width + 'px', d.height + 'px');
+                }
+            }, 150);
+        });
+        ro.observe(this.elements.readerArea);
 
         // Loading timeout — if the book doesn't render within 20 seconds, show error.
         var loadingTimeout = setTimeout(function () {
@@ -193,6 +234,8 @@
             }
             return self.rendition.display();
         }).then(function () {
+            // Auto-detect best text color for the EPUB background.
+            self.autoDetectTextColor();
             console.log('WP-kko EPUB Viewer: Generating locations...');
             return self.book.locations.generate(1024);
         }).then(function () {
@@ -228,6 +271,82 @@
 
         // Load bookmarks.
         self.loadBookmarks();
+    };
+
+    // --- Text color ---
+
+    EPUBReader.prototype.cycleTextColor = function () {
+        this.textColorIndex = (this.textColorIndex + 1) % TEXT_COLORS.length;
+        var entry = TEXT_COLORS[this.textColorIndex];
+
+        if (entry.value === null) {
+            // Auto mode — detect from background.
+            this.autoDetectTextColor();
+            this.showToast('Text: Auto');
+        } else {
+            this.applyTextColor(entry.value);
+            this.showToast('Text: ' + entry.name);
+        }
+    };
+
+    EPUBReader.prototype.applyTextColor = function (color) {
+        if (!this.rendition) return;
+        this.rendition.themes.override('color', color, true);
+    };
+
+    /**
+     * Detect the EPUB content background color and pick a text color
+     * that provides good contrast for readability.
+     */
+    EPUBReader.prototype.autoDetectTextColor = function () {
+        if (!this.rendition || !this.rendition.manager) return;
+
+        var bgColor = null;
+
+        // Try to read the background from the epub iframe body.
+        try {
+            var views = this.rendition.manager.views;
+            if (views && views._views && views._views.length > 0) {
+                var doc = views._views[0].document;
+                if (doc && doc.body) {
+                    var computed = doc.defaultView.getComputedStyle(doc.body);
+                    bgColor = computed.backgroundColor;
+                }
+            }
+        } catch (e) {
+            // Silently ignore — use viewer background as fallback.
+        }
+
+        // Fallback: read the viewer container background.
+        if (!bgColor || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') {
+            var viewerComputed = window.getComputedStyle(this.container);
+            bgColor = viewerComputed.backgroundColor;
+        }
+
+        if (!bgColor || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') {
+            return; // Can't detect, leave as-is.
+        }
+
+        var lum = this.getLuminance(bgColor);
+        // Dark background → white text; light background → black text.
+        var bestColor = lum < 0.5 ? '#ffffff' : '#000000';
+        this.applyTextColor(bestColor);
+    };
+
+    /**
+     * Parse an rgb/rgba CSS color string and return its relative luminance (0–1).
+     */
+    EPUBReader.prototype.getLuminance = function (cssColor) {
+        var m = cssColor.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+        if (!m) return 0.5; // Unknown format — assume mid-tone.
+        var r = parseInt(m[1], 10) / 255;
+        var g = parseInt(m[2], 10) / 255;
+        var b = parseInt(m[3], 10) / 255;
+        // sRGB luminance formula.
+        r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+        g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+        b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
     };
 
     EPUBReader.prototype.updatePageInfo = function (location) {
@@ -283,6 +402,12 @@
         this.container.className = classes.join(' ');
         this.skin = skin;
         this.container.setAttribute('data-epub-skin', skin);
+
+        // Re-apply auto text color if in auto mode.
+        if (this.textColorIndex === 0) {
+            var self = this;
+            setTimeout(function () { self.autoDetectTextColor(); }, 100);
+        }
     };
 
     // --- Bookmarks ---

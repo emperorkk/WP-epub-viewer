@@ -178,6 +178,12 @@
     opacity: 0.7;
 }
 
+/* Text color button */
+.wpkko-btn-text-color .wpkko-icon {
+    font-weight: bold;
+    font-size: 15px;
+}
+
 .wpkko-btn-delete-bookmark {
     float: right;
     font-size: 16px;

@@ -3,7 +3,7 @@
  * Plugin Name: WP-kko EPUB Viewer
  * Plugin URI:  https://github.com/emperorkk/wp-epub-viewer
  * Description: A full-featured EPUB reader for WordPress with Gutenberg block, Elementor widget, and classic editor shortcode support. Includes 10 CSS skins, TOC, bookmarking, search, fullscreen, and more.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      emperorkk
  * Author URI:  https://github.com/emperorkk
  * License:     GPL-2.0-or-later
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'WPKKO_EPUB_VERSION', '1.0.0' );
+define( 'WPKKO_EPUB_VERSION', '1.1.0' );
 define( 'WPKKO_EPUB_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPKKO_EPUB_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPKKO_EPUB_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );

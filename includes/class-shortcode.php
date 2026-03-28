@@ -101,6 +101,9 @@ class WPKko_EPUB_Shortcode {
                 <button class="wpkko-btn wpkko-btn-search" title="<?php esc_attr_e( 'Search', 'wp-kko-epub-viewer' ); ?>">
                     <span class="wpkko-icon">&#128269;</span>
                 </button>
+                <button class="wpkko-btn wpkko-btn-text-color" title="<?php esc_attr_e( 'Cycle Text Color', 'wp-kko-epub-viewer' ); ?>">
+                    <span class="wpkko-icon">&#x1D00;</span>
+                </button>
                 <button class="wpkko-btn wpkko-btn-fullscreen" title="<?php esc_attr_e( 'Fullscreen', 'wp-kko-epub-viewer' ); ?>">
                     <span class="wpkko-icon">&#x26F6;</span>
                 </button>
