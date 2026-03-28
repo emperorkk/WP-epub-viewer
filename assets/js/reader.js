@@ -437,9 +437,7 @@
                 a.href = '#';
                 a.addEventListener('click', function (e) {
                     e.preventDefault();
-                    // Strip trailing '#' or '#' with empty fragment from TOC hrefs.
-                    var href = item.href.replace(/#$/, '');
-                    self.rendition.display(href);
+                    self.navigateToTocItem(item);
                     self.elements.tocSidebar.style.display = 'none';
                 });
                 li.appendChild(a);
@@ -456,9 +454,67 @@
         buildItems(toc, this.elements.tocList);
     };
 
+    /**
+     * Navigate to a TOC item with fallback strategies.
+     */
+    EPUBReader.prototype.navigateToTocItem = function (item) {
+        var self = this;
+        var href = item.href.replace(/#$/, '');
+        var hrefBase = href.split('#')[0]; // Strip fragment for spine matching.
+
+        console.log('WP-kko EPUB Viewer: TOC click, href:', href);
+
+        this.rendition.display(href).then(function () {
+            console.log('WP-kko EPUB Viewer: TOC navigation success');
+        }).catch(function (err) {
+            console.warn('WP-kko EPUB Viewer: TOC display failed for "' + href + '":', err);
+
+            // Fallback 1: try without fragment.
+            if (href !== hrefBase && hrefBase) {
+                console.log('WP-kko EPUB Viewer: Retrying without fragment:', hrefBase);
+                return self.rendition.display(hrefBase);
+            }
+            return Promise.reject(err);
+        }).catch(function (err) {
+            // Fallback 2: find a matching spine item by partial path match.
+            var spineItems = self.book.spine.spineItems;
+            var match = null;
+            for (var i = 0; i < spineItems.length; i++) {
+                var sh = spineItems[i].href;
+                if (sh === hrefBase || sh.indexOf(hrefBase) !== -1 || hrefBase.indexOf(sh) !== -1) {
+                    match = spineItems[i];
+                    break;
+                }
+            }
+            if (match) {
+                console.log('WP-kko EPUB Viewer: Retrying with spine match:', match.href);
+                return self.rendition.display(match.href);
+            }
+
+            // Fallback 3: try using the item's id as a spine index.
+            if (item.id) {
+                var section = self.book.spine.get(item.id);
+                if (section) {
+                    console.log('WP-kko EPUB Viewer: Retrying with spine id:', item.id);
+                    return self.rendition.display(section.href);
+                }
+            }
+
+            console.error('WP-kko EPUB Viewer: All TOC navigation attempts failed for:', href);
+        });
+    };
+
     EPUBReader.prototype.changeFontSize = function (delta) {
         this.fontSize = Math.max(50, Math.min(200, this.fontSize + delta));
         this._injectSkinCss();
+        // After zoom change, force epub.js to recalculate column layout.
+        if (this.rendition && this.rendition.location) {
+            var self = this;
+            var cfi = this.rendition.location.start.cfi;
+            setTimeout(function () {
+                self.rendition.display(cfi);
+            }, 100);
+        }
         this.showToast('Font: ' + this.fontSize + '%');
     };
 
