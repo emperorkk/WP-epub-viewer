@@ -157,33 +157,55 @@
             return;
         }
 
-        this.book = ePub(this.src);
+        console.log('WP-kko EPUB Viewer: Loading book from', this.src);
+
+        this.book = ePub(this.src, { openAs: 'epub' });
         this.rendition = this.book.renderTo(this.elements.readerArea, {
             width:  '100%',
             height: '100%',
             spread: 'auto'
         });
 
+        // Loading timeout — if the book doesn't render within 20 seconds, show error.
+        var loadingTimeout = setTimeout(function () {
+            if (self.elements.loading.style.display !== 'none') {
+                console.error('WP-kko EPUB Viewer: Loading timed out after 20 seconds.');
+                self.elements.loading.innerHTML =
+                    '<p style="color:red;">Loading timed out. The EPUB file may be blocked by CORS, ' +
+                    'corrupted, or the server may not be responding. Check the browser console for details.</p>';
+            }
+        }, 20000);
+
         // Hide loading as soon as the first page renders.
         this.rendition.on('displayed', function () {
+            clearTimeout(loadingTimeout);
             self.elements.loading.style.display = 'none';
         });
 
         // Wait for book to be ready, then display and generate locations.
         this.book.ready.then(function () {
+            console.log('WP-kko EPUB Viewer: Book ready, loading progress...');
             return self.loadProgressAsync();
         }).then(function (savedLocation) {
+            console.log('WP-kko EPUB Viewer: Displaying book...');
             if (savedLocation) {
                 return self.rendition.display(savedLocation);
             }
             return self.rendition.display();
         }).then(function () {
+            console.log('WP-kko EPUB Viewer: Generating locations...');
             return self.book.locations.generate(1024);
         }).then(function () {
             self.updatePageInfo();
         }).catch(function (err) {
+            clearTimeout(loadingTimeout);
             console.error('WP-kko EPUB Viewer: Failed to load book', err);
             self.elements.loading.innerHTML = '<p style="color:red;">Failed to load EPUB file. Check the console for details.</p>';
+        });
+
+        // Build TOC.
+        this.book.loaded.navigation.then(function (nav) {
+            self.buildTOC(nav.toc);
         });
 
         this.rendition.on('relocated', function (location) {
@@ -202,11 +224,6 @@
                 if (diff > 0) self.rendition.next();
                 else self.rendition.prev();
             }
-        });
-
-        // Build TOC.
-        this.book.loaded.navigation.then(function (nav) {
-            self.buildTOC(nav.toc);
         });
 
         // Load bookmarks.
