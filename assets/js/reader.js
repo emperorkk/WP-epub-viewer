@@ -1,5 +1,5 @@
 /**
- * WP-kko EPUB Viewer — Front-end reader powered by epub.js
+ * WP-kko EPUB Viewer \u2014 Front-end reader powered by epub.js
  */
 (function () {
     'use strict';
@@ -17,7 +17,7 @@
     }
 
     /**
-     * EPUBReader class — one instance per viewer.
+     * EPUBReader class \u2014 one instance per viewer.
      */
     function EPUBReader(container) {
         this.container = container;
@@ -108,7 +108,7 @@
             }
         });
 
-        // Bookmark panel — click the bookmark button to toggle.
+        // Bookmark panel \u2014 click the bookmark button to toggle.
         c.querySelector('.wpkko-btn-bookmark').addEventListener('dblclick', function () {
             self.togglePanel('bookmarksPanel');
             self.renderBookmarks();
@@ -151,6 +151,12 @@
     EPUBReader.prototype.loadBook = function () {
         var self = this;
 
+        if (typeof ePub === 'undefined') {
+            self.elements.loading.innerHTML = '<p style="color:red;">Error: epub.js library failed to load.</p>';
+            console.error('WP-kko EPUB Viewer: ePub is not defined. The epub.js CDN may be blocked.');
+            return;
+        }
+
         this.book = ePub(this.src);
         this.rendition = this.book.renderTo(this.elements.readerArea, {
             width:  '100%',
@@ -172,6 +178,9 @@
             return self.book.locations.generate(1024);
         }).then(function () {
             self.updatePageInfo();
+        }).catch(function (err) {
+            console.error('WP-kko EPUB Viewer: Failed to load book', err);
+            self.elements.loading.innerHTML = '<p style="color:red;">Failed to load EPUB file. Check the console for details.</p>';
         });
 
         this.rendition.on('relocated', function (location) {
@@ -302,7 +311,7 @@
 
             var a = document.createElement('a');
             a.href = '#';
-            a.textContent = bm.label + ' — ' + bm.date;
+            a.textContent = bm.label + ' \u2014 ' + bm.date;
             a.addEventListener('click', function (e) {
                 e.preventDefault();
                 self.rendition.display(bm.cfi);

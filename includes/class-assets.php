@@ -32,20 +32,11 @@ class WPKko_EPUB_Assets {
         }
         self::$enqueued = true;
 
-        // JSZip from CDN.
-        wp_enqueue_script(
-            'jszip',
-            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-            array(),
-            '3.10.1',
-            true
-        );
-
-        // epub.js from CDN.
+        // epub.js from jsDelivr CDN (includes JSZip internally).
         wp_enqueue_script(
             'epubjs',
-            'https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js',
-            array( 'jszip' ),
+            'https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js',
+            array(),
             '0.3.93',
             true
         );
