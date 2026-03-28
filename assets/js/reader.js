@@ -151,6 +151,12 @@
     EPUBReader.prototype.loadBook = function () {
         var self = this;
 
+        if (typeof ePub === 'undefined') {
+            self.elements.loading.innerHTML = '<p style="color:red;">Error: epub.js library failed to load.</p>';
+            console.error('WP-kko EPUB Viewer: ePub is not defined. The epub.js CDN may be blocked.');
+            return;
+        }
+
         this.book = ePub(this.src);
         this.rendition = this.book.renderTo(this.elements.readerArea, {
             width:  '100%',
@@ -172,6 +178,9 @@
             return self.book.locations.generate(1024);
         }).then(function () {
             self.updatePageInfo();
+        }).catch(function (err) {
+            console.error('WP-kko EPUB Viewer: Failed to load book', err);
+            self.elements.loading.innerHTML = '<p style="color:red;">Failed to load EPUB file. Check the console for details.</p>';
         });
 
         this.rendition.on('relocated', function (location) {
