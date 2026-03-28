@@ -235,8 +235,8 @@
             }
             return self.rendition.display();
         }).then(function () {
-            // Auto-detect best text color for the EPUB background.
-            self.autoDetectTextColor();
+            // Apply skin background + auto text color into the epub iframe.
+            self.applySkinToRendition();
             console.log('WP-kko EPUB Viewer: Generating locations...');
             return self.book.locations.generate(1024);
         }).then(function () {
@@ -272,6 +272,28 @@
 
         // Load bookmarks.
         self.loadBookmarks();
+    };
+
+    // --- Skin → epub iframe ---
+
+    /**
+     * Push the current skin's background color into the epub iframe
+     * and pick a matching text color.
+     */
+    EPUBReader.prototype.applySkinToRendition = function () {
+        if (!this.rendition) return;
+
+        var bg = window.getComputedStyle(this.container).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            this.rendition.themes.override('background-color', bg, true);
+        }
+
+        // Apply text color: manual override or auto-detect.
+        if (this.textColorIndex === 0) {
+            this.autoDetectTextColor();
+        } else {
+            this.applyTextColor(TEXT_COLORS[this.textColorIndex].value);
+        }
     };
 
     // --- Text color ---
@@ -404,11 +426,9 @@
         this.skin = skin;
         this.container.setAttribute('data-epub-skin', skin);
 
-        // Re-apply auto text color if in auto mode.
-        if (this.textColorIndex === 0) {
-            var self = this;
-            setTimeout(function () { self.autoDetectTextColor(); }, 100);
-        }
+        // Push the new skin's background + text color into the epub iframe.
+        var self = this;
+        setTimeout(function () { self.applySkinToRendition(); }, 50);
     };
 
     // --- Bookmarks ---
