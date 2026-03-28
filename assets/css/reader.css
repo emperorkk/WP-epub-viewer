@@ -166,8 +166,14 @@
     border: 1px solid rgba(128, 128, 128, 0.3);
     border-radius: 4px;
     font-size: 13px;
-    margin-right: 6px;
+    margin-right: 4px;
     background: transparent;
+}
+
+.wpkko-btn-search-go {
+    padding: 4px 8px;
+    font-size: 13px;
+    margin-right: 4px;
 }
 
 .wpkko-no-results,

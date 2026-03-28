@@ -129,6 +129,7 @@ class WPKko_EPUB_Shortcode {
             <div class="wpkko-search-panel" style="display:none;">
                 <div class="wpkko-search-header">
                     <input type="text" class="wpkko-search-input" placeholder="<?php esc_attr_e( 'Search...', 'wp-kko-epub-viewer' ); ?>">
+                    <button class="wpkko-btn wpkko-btn-search-go" title="<?php esc_attr_e( 'Search', 'wp-kko-epub-viewer' ); ?>">&#128269;</button>
                     <button class="wpkko-btn wpkko-btn-search-close">&times;</button>
                 </div>
                 <ul class="wpkko-search-results"></ul>

@@ -125,6 +125,11 @@
             }
         });
 
+        // Search "Go" button.
+        c.querySelector('.wpkko-btn-search-go').addEventListener('click', function () {
+            self.doSearch(self.elements.searchInput.value);
+        });
+
         // Bookmark panel — click the bookmark button to toggle.
         c.querySelector('.wpkko-btn-bookmark').addEventListener('dblclick', function () {
             self.togglePanel('bookmarksPanel');
@@ -225,10 +230,6 @@
             if (css) {
                 contents.addStylesheetCss(css, 'wpkko-skin');
             }
-            // Also apply font-size inline override for belt-and-suspenders.
-            if (self.fontSize !== 100) {
-                contents.css('font-size', self.fontSize + '%', true);
-            }
         });
 
         // Hide loading as soon as the first page renders.
@@ -291,25 +292,29 @@
 
     /**
      * Build CSS to inject into the epub iframe for skin colors + font size.
+     *
+     * Font scaling uses CSS zoom on <html> so that ALL content (including
+     * elements with absolute px font sizes) scales proportionally while
+     * preserving the relative sizing between headings and body text.
      */
     EPUBReader.prototype._buildSkinCss = function () {
         var colorRules = [];
-        var bodyRules = [];
+        var css = '';
+
         if (this._skinBg) {
             colorRules.push('background-color: ' + this._skinBg + ' !important');
         }
         if (this._skinColor) {
             colorRules.push('color: ' + this._skinColor + ' !important');
         }
-        if (this.fontSize !== 100) {
-            bodyRules.push('font-size: ' + this.fontSize + '% !important');
-        }
-        var css = '';
         if (colorRules.length) {
             css += 'body, body * { ' + colorRules.join('; ') + '; }\n';
         }
-        if (bodyRules.length) {
-            css += 'body { ' + bodyRules.join('; ') + '; }\n';
+
+        // Use zoom for font scaling — works on all content including absolute px sizes.
+        if (this.fontSize !== 100) {
+            var zoomFactor = this.fontSize / 100;
+            css += 'html { zoom: ' + zoomFactor + ' !important; -moz-transform: scale(' + zoomFactor + '); -moz-transform-origin: top left; }\n';
         }
         return css;
     };
@@ -331,11 +336,6 @@
             this.autoDetectTextColor();
         } else {
             this.applyTextColor(TEXT_COLORS[this.textColorIndex].value);
-        }
-
-        // Ensure font-size override is applied if not default.
-        if (this.fontSize !== 100) {
-            this.rendition.themes.override('font-size', this.fontSize + '%', true);
         }
     };
 
@@ -456,10 +456,6 @@
     EPUBReader.prototype.changeFontSize = function (delta) {
         this.fontSize = Math.max(50, Math.min(200, this.fontSize + delta));
         this._injectSkinCss();
-        // Belt-and-suspenders: also set inline body style with !important via epub.js themes.
-        if (this.rendition) {
-            this.rendition.themes.override('font-size', this.fontSize + '%', true);
-        }
         this.showToast('Font: ' + this.fontSize + '%');
     };
 
@@ -565,15 +561,13 @@
         searching.className = 'wpkko-no-results';
         this.elements.searchResults.appendChild(searching);
 
-        // Search through each section.
+        // Search through each section — find ALL occurrences per section.
         // section.load() returns documentElement (an Element, not a Document).
-        Promise.all(
+        var searchPromise = Promise.all(
             spine.spineItems.map(function (item) {
                 return item.load(self.book.load.bind(self.book)).then(function (el) {
-                    // el is documentElement — get all text from the document.
                     var text = '';
                     if (el && el.querySelector) {
-                        // Try to get body text first for cleaner results.
                         var body = el.querySelector('body');
                         text = body ? body.textContent : (el.textContent || '');
                     } else if (el) {
@@ -581,20 +575,25 @@
                     }
                     var lowerText = text.toLowerCase();
                     var lowerQuery = query.toLowerCase();
-                    var idx = lowerText.indexOf(lowerQuery);
-                    if (idx !== -1) {
+                    var idx = 0;
+                    var count = 0;
+                    while ((idx = lowerText.indexOf(lowerQuery, idx)) !== -1 && count < 5) {
                         var excerpt = text.substring(Math.max(0, idx - 40), idx + query.length + 40);
                         results.push({
                             href:    item.href,
                             excerpt: '...' + excerpt.trim() + '...'
                         });
+                        idx += lowerQuery.length;
+                        count++;
                     }
                     item.unload();
                 }).catch(function (err) {
                     console.warn('WP-kko EPUB Viewer: Search failed for section', item.href, err);
                 });
             })
-        ).then(function () {
+        );
+
+        searchPromise.then(function () {
             self.elements.searchResults.innerHTML = '';
 
             console.log('WP-kko EPUB Viewer: Search complete, found', results.length, 'results');
@@ -620,6 +619,13 @@
                 li.appendChild(a);
                 self.elements.searchResults.appendChild(li);
             });
+        }).catch(function (err) {
+            console.error('WP-kko EPUB Viewer: Search error', err);
+            self.elements.searchResults.innerHTML = '';
+            var li = document.createElement('li');
+            li.textContent = 'Search failed. Please try again.';
+            li.className = 'wpkko-no-results';
+            self.elements.searchResults.appendChild(li);
         });
     };
 
