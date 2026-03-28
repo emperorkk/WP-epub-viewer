@@ -191,7 +191,8 @@
         this.rendition = this.book.renderTo(this.elements.readerArea, {
             width:  dims.width,
             height: dims.height,
-            spread: 'auto'
+            spread: 'auto',
+            method: 'blobUrl'
         });
 
         // Resize rendition when the container resizes.
