@@ -194,21 +194,6 @@
             spread: 'auto'
         });
 
-        // Patch epub.js Stage.size() bug: when called with no arguments,
-        // width/height are undefined. The code checks === null but misses
-        // undefined, causing container.style.width = "undefined" (invalid CSS).
-        // Converting undefined → null triggers the correct getBoundingClientRect fallback.
-        var stage = this.rendition.manager && this.rendition.manager.stage;
-        if (stage && stage.size) {
-            var origSize = stage.size.bind(stage);
-            stage.size = function (w, h) {
-                return origSize(
-                    typeof w === 'undefined' ? null : w,
-                    typeof h === 'undefined' ? null : h
-                );
-            };
-        }
-
         // Resize rendition when the container resizes.
         var resizeTimer;
         var ro = new ResizeObserver(function () {

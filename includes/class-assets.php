@@ -41,12 +41,12 @@ class WPKko_EPUB_Assets {
             true
         );
 
-        // epub.js from jsDelivr CDN.
+        // epub.js — local patched build (fixes Stage.size() CSS errors).
         wp_enqueue_script(
             'epubjs',
-            'https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js',
+            WPKKO_EPUB_PLUGIN_URL . 'assets/js/vendor/epub.min.js',
             array( 'jszip' ),
-            '0.3.93',
+            '0.3.93-patched',
             true
         );
 
