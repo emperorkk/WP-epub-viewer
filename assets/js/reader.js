@@ -277,6 +277,22 @@
     // --- Skin → epub iframe ---
 
     /**
+     * Build CSS to inject into the epub iframe for skin colors.
+     */
+    EPUBReader.prototype._buildSkinCss = function () {
+        var rules = [];
+        if (this._skinBg) {
+            rules.push('background-color: ' + this._skinBg + ' !important');
+        }
+        if (this._skinColor) {
+            rules.push('color: ' + this._skinColor + ' !important');
+        }
+        if (!rules.length) return '';
+        var decl = rules.join('; ');
+        return 'body, body * { ' + decl + '; }';
+    };
+
+    /**
      * Push the current skin's background color into the epub iframe
      * and pick a matching text color.
      */
@@ -285,7 +301,7 @@
 
         var bg = window.getComputedStyle(this.container).backgroundColor;
         if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            this.rendition.themes.override('background-color', bg, true);
+            this._skinBg = bg;
         }
 
         // Apply text color: manual override or auto-detect.
@@ -314,37 +330,36 @@
 
     EPUBReader.prototype.applyTextColor = function (color) {
         if (!this.rendition) return;
-        this.rendition.themes.override('color', color, true);
+        this._skinColor = color;
+        this._injectSkinCss();
     };
 
     /**
-     * Detect the EPUB content background color and pick a text color
+     * Inject (or update) the skin CSS into the epub iframe.
+     */
+    EPUBReader.prototype._injectSkinCss = function () {
+        if (!this.rendition) return;
+        var css = this._buildSkinCss();
+        if (!css) return;
+
+        // registerCss replaces the style element content if key matches.
+        this.rendition.themes.registerCss('wpkko-skin', css);
+
+        // Ensure it's applied to all current views.
+        var contents = this.rendition.getContents();
+        contents.forEach(function (c) {
+            c.addStylesheetCss(css, 'wpkko-skin');
+        });
+    };
+
+    /**
+     * Detect the skin background color and pick a text color
      * that provides good contrast for readability.
      */
     EPUBReader.prototype.autoDetectTextColor = function () {
-        if (!this.rendition || !this.rendition.manager) return;
+        if (!this.rendition) return;
 
-        var bgColor = null;
-
-        // Try to read the background from the epub iframe body.
-        try {
-            var views = this.rendition.manager.views;
-            if (views && views._views && views._views.length > 0) {
-                var doc = views._views[0].document;
-                if (doc && doc.body) {
-                    var computed = doc.defaultView.getComputedStyle(doc.body);
-                    bgColor = computed.backgroundColor;
-                }
-            }
-        } catch (e) {
-            // Silently ignore — use viewer background as fallback.
-        }
-
-        // Fallback: read the viewer container background.
-        if (!bgColor || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') {
-            var viewerComputed = window.getComputedStyle(this.container);
-            bgColor = viewerComputed.backgroundColor;
-        }
+        var bgColor = this._skinBg || window.getComputedStyle(this.container).backgroundColor;
 
         if (!bgColor || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') {
             return; // Can't detect, leave as-is.
@@ -353,7 +368,8 @@
         var lum = this.getLuminance(bgColor);
         // Dark background → white text; light background → black text.
         var bestColor = lum < 0.5 ? '#ffffff' : '#000000';
-        this.applyTextColor(bestColor);
+        this._skinColor = bestColor;
+        this._injectSkinCss();
     };
 
     /**
