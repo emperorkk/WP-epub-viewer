@@ -189,8 +189,8 @@
 
         this.book = ePub(this.src, { openAs: 'epub' });
         this.rendition = this.book.renderTo(this.elements.readerArea, {
-            width:  dims.width + 'px',
-            height: dims.height + 'px',
+            width:  dims.width,
+            height: dims.height,
             spread: 'auto'
         });
 
@@ -201,7 +201,7 @@
             resizeTimer = setTimeout(function () {
                 if (self.rendition) {
                     var d = self.getReaderDimensions();
-                    self.rendition.resize(d.width + 'px', d.height + 'px');
+                    self.rendition.resize(d.width, d.height);
                 }
             }, 150);
         });
