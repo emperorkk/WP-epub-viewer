@@ -193,8 +193,7 @@
         this.rendition = this.book.renderTo(this.elements.readerArea, {
             width:  dims.width,
             height: dims.height,
-            spread: 'auto',
-            method: 'blobUrl'
+            spread: 'auto'
         });
 
         // Resize rendition when the container resizes.
@@ -219,6 +218,14 @@
                     'corrupted, or the server may not be responding. Check the browser console for details.</p>';
             }
         }, 20000);
+
+        // Register content hook early — injects skin CSS into every chapter.
+        this.rendition.hooks.content.register(function (contents) {
+            var css = self._buildSkinCss();
+            if (css) {
+                contents.addStylesheetCss(css, 'wpkko-skin');
+            }
+        });
 
         // Hide loading as soon as the first page renders.
         this.rendition.on('displayed', function () {
@@ -346,32 +353,18 @@
     };
 
     /**
-     * Inject (or update) the skin CSS into the epub iframe.
-     * Also registers a content hook so new chapters get the CSS.
+     * Inject (or update) the skin CSS into the current epub iframe view.
+     * The content hook (registered in loadBook) handles future chapters.
      */
     EPUBReader.prototype._injectSkinCss = function () {
         if (!this.rendition) return;
-        var self = this;
         var css = this._buildSkinCss();
+        if (!css) return;
 
-        // Apply to all current views.
         var contents = this.rendition.getContents();
         contents.forEach(function (c) {
-            if (css) {
-                c.addStylesheetCss(css, 'wpkko-skin');
-            }
+            c.addStylesheetCss(css, 'wpkko-skin');
         });
-
-        // Register hook once so future chapter loads also get the CSS.
-        if (!this._skinHookRegistered) {
-            this._skinHookRegistered = true;
-            this.rendition.hooks.content.register(function (contents) {
-                var liveCss = self._buildSkinCss();
-                if (liveCss) {
-                    contents.addStylesheetCss(liveCss, 'wpkko-skin');
-                }
-            });
-        }
     };
 
     /**
@@ -432,7 +425,12 @@
                 a.href = '#';
                 a.addEventListener('click', function (e) {
                     e.preventDefault();
-                    self.rendition.display(item.href);
+                    console.log('WP-kko EPUB Viewer: TOC navigate to', item.href);
+                    self.rendition.display(item.href).then(function () {
+                        console.log('WP-kko EPUB Viewer: TOC navigation success');
+                    }, function (err) {
+                        console.error('WP-kko EPUB Viewer: TOC navigation failed', err);
+                    });
                     self.elements.tocSidebar.style.display = 'none';
                 });
                 li.appendChild(a);
@@ -549,12 +547,11 @@
         var spine = this.book.spine;
 
         // Search through each section.
+        // section.load() returns documentElement (an Element, not a Document).
         Promise.all(
             spine.spineItems.map(function (item) {
-                return item.load(self.book.load.bind(self.book)).then(function (contents) {
-                    var doc = contents.ownerDocument || contents;
-                    var body = doc.body || (doc.querySelector && doc.querySelector('body'));
-                    var text = body ? body.textContent : (typeof contents === 'string' ? contents : '');
+                return item.load(self.book.load.bind(self.book)).then(function (el) {
+                    var text = el.textContent || '';
                     var idx = text.toLowerCase().indexOf(query.toLowerCase());
                     if (idx !== -1) {
                         var excerpt = text.substring(Math.max(0, idx - 40), idx + query.length + 40);
@@ -564,8 +561,8 @@
                         });
                     }
                     item.unload();
-                }).catch(function () {
-                    // Skip sections that fail to load.
+                }).catch(function (err) {
+                    console.warn('WP-kko EPUB Viewer: Search failed for section', item.href, err);
                 });
             })
         ).then(function () {
