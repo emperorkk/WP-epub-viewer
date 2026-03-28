@@ -32,11 +32,20 @@ class WPKko_EPUB_Assets {
         }
         self::$enqueued = true;
 
-        // epub.js from jsDelivr CDN (includes JSZip internally).
+        // JSZip — required by epub.js to unzip EPUB files.
+        wp_enqueue_script(
+            'jszip',
+            'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+            array(),
+            '3.10.1',
+            true
+        );
+
+        // epub.js from jsDelivr CDN.
         wp_enqueue_script(
             'epubjs',
             'https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js',
-            array(),
+            array( 'jszip' ),
             '0.3.93',
             true
         );
