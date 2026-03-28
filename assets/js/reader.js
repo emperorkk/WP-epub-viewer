@@ -1,5 +1,5 @@
 /**
- * WP-kko EPUB Viewer \u2014 Front-end reader powered by epub.js
+ * WP-kko EPUB Viewer — Front-end reader powered by epub.js
  */
 (function () {
     'use strict';
@@ -17,7 +17,7 @@
     }
 
     /**
-     * EPUBReader class \u2014 one instance per viewer.
+     * EPUBReader class — one instance per viewer.
      */
     function EPUBReader(container) {
         this.container = container;
@@ -108,7 +108,7 @@
             }
         });
 
-        // Bookmark panel \u2014 click the bookmark button to toggle.
+        // Bookmark panel — click the bookmark button to toggle.
         c.querySelector('.wpkko-btn-bookmark').addEventListener('dblclick', function () {
             self.togglePanel('bookmarksPanel');
             self.renderBookmarks();
@@ -164,17 +164,20 @@
             spread: 'auto'
         });
 
-        // Load saved progress or start from the beginning.
-        this.loadProgress(function (location) {
-            if (location) {
-                self.rendition.display(location);
-            } else {
-                self.rendition.display();
-            }
+        // Hide loading as soon as the first page renders.
+        this.rendition.on('displayed', function () {
+            self.elements.loading.style.display = 'none';
         });
 
+        // Wait for book to be ready, then display and generate locations.
         this.book.ready.then(function () {
-            self.elements.loading.style.display = 'none';
+            return self.loadProgressAsync();
+        }).then(function (savedLocation) {
+            if (savedLocation) {
+                return self.rendition.display(savedLocation);
+            }
+            return self.rendition.display();
+        }).then(function () {
             return self.book.locations.generate(1024);
         }).then(function () {
             self.updatePageInfo();
@@ -460,7 +463,7 @@
         }
     };
 
-    EPUBReader.prototype.loadProgress = function (callback) {
+    EPUBReader.prototype.loadProgressAsync = function () {
         var self = this;
 
         if (wpkkoEpub.nonce) {
@@ -468,21 +471,20 @@
                       encodeURIComponent(wpkkoEpub.nonce) + '&book_id=' +
                       encodeURIComponent(this.bookId);
 
-            fetch(url, { credentials: 'same-origin' })
+            return fetch(url, { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (resp) {
                     if (resp.success && resp.data) {
-                        callback(resp.data);
-                    } else {
-                        callback(self.loadProgressFromStorage());
+                        return resp.data;
                     }
+                    return self.loadProgressFromStorage();
                 })
                 .catch(function () {
-                    callback(self.loadProgressFromStorage());
+                    return self.loadProgressFromStorage();
                 });
-        } else {
-            callback(this.loadProgressFromStorage());
         }
+
+        return Promise.resolve(this.loadProgressFromStorage());
     };
 
     EPUBReader.prototype.loadProgressFromStorage = function () {
