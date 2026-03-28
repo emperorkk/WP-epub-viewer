@@ -38,6 +38,8 @@
         this.book      = null;
         this.rendition = null;
         this.textColorIndex = 0; // 0 = Auto
+        this._skinBg    = null;
+        this._skinColor = null;
 
         this.elements = {
             readerArea:      container.querySelector('.wpkko-reader-area'),
@@ -277,19 +279,28 @@
     // --- Skin → epub iframe ---
 
     /**
-     * Build CSS to inject into the epub iframe for skin colors.
+     * Build CSS to inject into the epub iframe for skin colors + font size.
      */
     EPUBReader.prototype._buildSkinCss = function () {
-        var rules = [];
+        var colorRules = [];
+        var bodyRules = [];
         if (this._skinBg) {
-            rules.push('background-color: ' + this._skinBg + ' !important');
+            colorRules.push('background-color: ' + this._skinBg + ' !important');
         }
         if (this._skinColor) {
-            rules.push('color: ' + this._skinColor + ' !important');
+            colorRules.push('color: ' + this._skinColor + ' !important');
         }
-        if (!rules.length) return '';
-        var decl = rules.join('; ');
-        return 'body, body * { ' + decl + '; }';
+        if (this.fontSize !== 100) {
+            bodyRules.push('font-size: ' + this.fontSize + '% !important');
+        }
+        var css = '';
+        if (colorRules.length) {
+            css += 'body, body * { ' + colorRules.join('; ') + '; }\n';
+        }
+        if (bodyRules.length) {
+            css += 'body { ' + bodyRules.join('; ') + '; }\n';
+        }
+        return css;
     };
 
     /**
@@ -336,20 +347,31 @@
 
     /**
      * Inject (or update) the skin CSS into the epub iframe.
+     * Also registers a content hook so new chapters get the CSS.
      */
     EPUBReader.prototype._injectSkinCss = function () {
         if (!this.rendition) return;
+        var self = this;
         var css = this._buildSkinCss();
-        if (!css) return;
 
-        // registerCss replaces the style element content if key matches.
-        this.rendition.themes.registerCss('wpkko-skin', css);
-
-        // Ensure it's applied to all current views.
+        // Apply to all current views.
         var contents = this.rendition.getContents();
         contents.forEach(function (c) {
-            c.addStylesheetCss(css, 'wpkko-skin');
+            if (css) {
+                c.addStylesheetCss(css, 'wpkko-skin');
+            }
         });
+
+        // Register hook once so future chapter loads also get the CSS.
+        if (!this._skinHookRegistered) {
+            this._skinHookRegistered = true;
+            this.rendition.hooks.content.register(function (contents) {
+                var liveCss = self._buildSkinCss();
+                if (liveCss) {
+                    contents.addStylesheetCss(liveCss, 'wpkko-skin');
+                }
+            });
+        }
     };
 
     /**
@@ -429,7 +451,7 @@
 
     EPUBReader.prototype.changeFontSize = function (delta) {
         this.fontSize = Math.max(50, Math.min(200, this.fontSize + delta));
-        this.rendition.themes.fontSize(this.fontSize + '%');
+        this._injectSkinCss();
     };
 
     EPUBReader.prototype.changeSkin = function (skin) {
@@ -526,20 +548,24 @@
         var results = [];
         var spine = this.book.spine;
 
-        // We need to search through each section.
+        // Search through each section.
         Promise.all(
             spine.spineItems.map(function (item) {
-                return item.load(self.book.load.bind(self.book)).then(function (doc) {
-                    var text = doc.body ? doc.body.textContent : '';
+                return item.load(self.book.load.bind(self.book)).then(function (contents) {
+                    var doc = contents.ownerDocument || contents;
+                    var body = doc.body || (doc.querySelector && doc.querySelector('body'));
+                    var text = body ? body.textContent : (typeof contents === 'string' ? contents : '');
                     var idx = text.toLowerCase().indexOf(query.toLowerCase());
                     if (idx !== -1) {
                         var excerpt = text.substring(Math.max(0, idx - 40), idx + query.length + 40);
                         results.push({
-                            cfi:     item.href,
+                            href:    item.href,
                             excerpt: '...' + excerpt.trim() + '...'
                         });
                     }
                     item.unload();
+                }).catch(function () {
+                    // Skip sections that fail to load.
                 });
             })
         ).then(function () {
@@ -558,7 +584,7 @@
                 a.textContent = r.excerpt;
                 a.addEventListener('click', function (e) {
                     e.preventDefault();
-                    self.rendition.display(r.cfi);
+                    self.rendition.display(r.href);
                     self.elements.searchPanel.style.display = 'none';
                 });
                 li.appendChild(a);
