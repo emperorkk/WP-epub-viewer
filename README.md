@@ -2,8 +2,8 @@
 Contributors: emperorkk
 Tags: epub, ebook, reader, viewer, book
 Requires at least: 5.8
-Tested up to: 6.7
-Stable tag: 1.2.3
+Tested up to: 6.9.4
+Stable tag: 2.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -96,15 +96,17 @@ Both are self-hosted in `assets/js/vendor/` with no external CDN calls.
 
 == Changelog ==
 
-= 1.2.3 =
-* Font size: em-based scaling preserving heading hierarchy
-* Search: CFI-based navigation for exact match positioning
-* TOC: heading-match fallback for EPUBs without fragment IDs
-* Search panel: proper colors on all dark skins
-* Renamed plugin to Superior e-Pub Viewer
-* Self-hosted JSZip (no more CDN dependency)
-* Fixed output escaping for width/height attributes
-* Removed deprecated load_plugin_textdomain call
+= 2.0.0 =
+* **Major rename:** Plugin is now "Superior e-Pub Viewer" (internal prefixes unchanged)
+* **Self-hosted dependencies:** JSZip bundled locally -- no external CDN calls
+* **Font size controls:** em-based scaling that preserves heading hierarchy across all skins
+* **Search:** CFI-based precision navigation for exact match positioning
+* **TOC navigation:** heading-match fallback for single-spine EPUBs without fragment IDs
+* **Search panel:** proper text colors on all dark skins
+* **Security:** fixed output escaping for width/height attributes
+* **Compatibility:** removed deprecated `load_plugin_textdomain` call (handled by WP core since 4.6)
+* **Attributions:** full MIT license texts for epub.js and JSZip in `assets/js/vendor/LICENSES.md`
+* Tested up to WordPress 6.9.4
 
 = 1.0.0 =
 * Initial release
