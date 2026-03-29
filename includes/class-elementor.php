@@ -25,7 +25,7 @@ class WPKko_EPUB_Elementor {
 
     public function add_category( $elements_manager ) {
         $elements_manager->add_category( 'wpkko-epub', array(
-            'title' => __( 'EPUB Viewer', 'wp-kko-epub-viewer' ),
+            'title' => __( 'EPUB Viewer', 'superior-e-pub-viewer' ),
             'icon'  => 'eicon-document-file',
         ) );
     }

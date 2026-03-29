@@ -1,4 +1,4 @@
-# WP-kko EPUB Viewer — Full Documentation
+# Superior e-Pub Viewer — Full Documentation
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@
 
 ## Overview
 
-WP-kko EPUB Viewer is a WordPress plugin that embeds a full-featured EPUB reader anywhere on your site. It supports three integration methods:
+Superior e-Pub Viewer is a WordPress plugin that embeds a full-featured EPUB reader anywhere on your site. It supports three integration methods:
 
 - **Gutenberg block** for the modern WordPress editor
 - **Elementor widget** for Elementor page builder users
@@ -36,9 +36,9 @@ The reader is powered by [epub.js](https://github.com/futurepress/epub.js), a we
 ### From GitHub
 
 1. Clone or download this repository
-2. Copy the entire folder to `wp-content/plugins/wp-kko-epub-viewer/`
+2. Copy the entire folder to `wp-content/plugins/superior-e-pub-viewer/`
 3. Go to **WordPress Admin → Plugins → Installed Plugins**
-4. Click **Activate** next to "WP-kko EPUB Viewer"
+4. Click **Activate** next to "Superior e-Pub Viewer"
 
 ### From ZIP
 
@@ -293,7 +293,7 @@ Each viewer has its own:
 ### Architecture
 
 ```
-wp-kko-epub-viewer.php     → Main plugin bootstrap
+superior-e-pub-viewer.php     → Main plugin bootstrap
 includes/
   class-settings.php       → Admin settings page & skin registry
   class-shortcode.php      → [epub_viewer] shortcode renderer
@@ -315,9 +315,10 @@ assets/
 
 ### Dependencies
 
-- **epub.js v0.3.93** — loaded from cdnjs CDN
-- **JSZip v3.10.1** — loaded from cdnjs CDN (required by epub.js)
+- **epub.js v0.3.93** (patched) — self-hosted in `assets/js/vendor/` — MIT License
+- **JSZip v3.10.1** — self-hosted in `assets/js/vendor/` — MIT License
 - No build tools required — plain JavaScript and CSS
+- No external CDN calls — fully self-contained
 
 ### Hooks & Filters
 

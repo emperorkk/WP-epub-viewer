@@ -20,8 +20,8 @@
     });
 
     blocks.registerBlockType('wpkko/epub-viewer', {
-        title: __('EPUB Viewer', 'wp-kko-epub-viewer'),
-        description: __('Embed an EPUB book reader.', 'wp-kko-epub-viewer'),
+        title: __('EPUB Viewer', 'superior-e-pub-viewer'),
+        description: __('Embed an EPUB book reader.', 'superior-e-pub-viewer'),
         icon: 'book-alt',
         category: 'embed',
         keywords: [__('epub'), __('ebook'), __('reader'), __('book')],
@@ -44,28 +44,28 @@
             };
 
             var sidebar = el(InspectorControls, {},
-                el(PanelBody, { title: __('EPUB Settings', 'wp-kko-epub-viewer') },
+                el(PanelBody, { title: __('EPUB Settings', 'superior-e-pub-viewer') },
                     el(SelectControl, {
-                        label: __('Skin', 'wp-kko-epub-viewer'),
+                        label: __('Skin', 'superior-e-pub-viewer'),
                         value: attributes.skin,
                         options: skinOptions,
                         onChange: function (val) { setAttributes({ skin: val }); }
                     }),
                     el(TextControl, {
-                        label: __('Width', 'wp-kko-epub-viewer'),
+                        label: __('Width', 'superior-e-pub-viewer'),
                         value: attributes.width,
                         onChange: function (val) { setAttributes({ width: val }); }
                     }),
                     el(TextControl, {
-                        label: __('Height', 'wp-kko-epub-viewer'),
+                        label: __('Height', 'superior-e-pub-viewer'),
                         value: attributes.height,
                         onChange: function (val) { setAttributes({ height: val }); }
                     }),
                     el(TextControl, {
-                        label: __('External URL (optional)', 'wp-kko-epub-viewer'),
+                        label: __('External URL (optional)', 'superior-e-pub-viewer'),
                         value: attributes.src,
                         onChange: function (val) { setAttributes({ src: val, mediaId: 0 }); },
-                        help: __('Enter a direct URL to an EPUB file, or use the upload button above.', 'wp-kko-epub-viewer')
+                        help: __('Enter a direct URL to an EPUB file, or use the upload button above.', 'superior-e-pub-viewer')
                     })
                 )
             );
@@ -75,9 +75,9 @@
                 var filename = attributes.src.split('/').pop();
                 content = el('div', { className: 'wpkko-epub-block-preview' },
                     el('div', { className: 'wpkko-epub-block-icon' }, '\uD83D\uDCD6'),
-                    el('p', {}, __('EPUB Viewer: ', 'wp-kko-epub-viewer') + filename),
+                    el('p', {}, __('EPUB Viewer: ', 'superior-e-pub-viewer') + filename),
                     el('p', { className: 'wpkko-epub-block-skin' },
-                        __('Skin: ', 'wp-kko-epub-viewer') + (skins[attributes.skin] || attributes.skin)
+                        __('Skin: ', 'superior-e-pub-viewer') + (skins[attributes.skin] || attributes.skin)
                     ),
                     el(MediaUpload, {
                         onSelect: onSelectMedia,
@@ -88,15 +88,15 @@
                                 onClick: obj.open,
                                 variant: 'secondary',
                                 isSmall: true
-                            }, __('Replace EPUB', 'wp-kko-epub-viewer'));
+                            }, __('Replace EPUB', 'superior-e-pub-viewer'));
                         }
                     })
                 );
             } else {
                 content = el(Placeholder, {
                     icon: 'book-alt',
-                    label: __('EPUB Viewer', 'wp-kko-epub-viewer'),
-                    instructions: __('Upload an EPUB file or enter a URL in the block settings.', 'wp-kko-epub-viewer')
+                    label: __('EPUB Viewer', 'superior-e-pub-viewer'),
+                    instructions: __('Upload an EPUB file or enter a URL in the block settings.', 'superior-e-pub-viewer')
                 },
                     el(MediaUpload, {
                         onSelect: onSelectMedia,
@@ -106,7 +106,7 @@
                             return el(Button, {
                                 onClick: obj.open,
                                 variant: 'primary'
-                            }, __('Upload EPUB', 'wp-kko-epub-viewer'));
+                            }, __('Upload EPUB', 'superior-e-pub-viewer'));
                         }
                     })
                 );

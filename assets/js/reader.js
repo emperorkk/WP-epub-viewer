@@ -1,5 +1,5 @@
 /**
- * WP-kko EPUB Viewer — Front-end reader powered by epub.js
+ * Superior e-Pub Viewer — Front-end reader powered by epub.js
  */
 (function () {
     'use strict';
@@ -189,11 +189,11 @@
 
         if (typeof ePub === 'undefined') {
             self.elements.loading.innerHTML = '<p style="color:red;">Error: epub.js library failed to load.</p>';
-            console.error('WP-kko EPUB Viewer: ePub is not defined. The epub.js CDN may be blocked.');
+            console.error('Superior e-Pub Viewer: ePub is not defined. The epub.js CDN may be blocked.');
             return;
         }
 
-        console.log('WP-kko EPUB Viewer: Loading book from', this.src);
+        console.log('Superior e-Pub Viewer: Loading book from', this.src);
 
         var dims = this.getReaderDimensions();
 
@@ -220,7 +220,7 @@
         // Loading timeout — if the book doesn't render within 20 seconds, show error.
         var loadingTimeout = setTimeout(function () {
             if (self.elements.loading.style.display !== 'none') {
-                console.error('WP-kko EPUB Viewer: Loading timed out after 20 seconds.');
+                console.error('Superior e-Pub Viewer: Loading timed out after 20 seconds.');
                 self.elements.loading.innerHTML =
                     '<p style="color:red;">Loading timed out. The EPUB file may be blocked by CORS, ' +
                     'corrupted, or the server may not be responding. Check the browser console for details.</p>';
@@ -243,10 +243,10 @@
 
         // Wait for book to be ready, then display and generate locations.
         this.book.ready.then(function () {
-            console.log('WP-kko EPUB Viewer: Book ready, loading progress...');
+            console.log('Superior e-Pub Viewer: Book ready, loading progress...');
             return self.loadProgressAsync();
         }).then(function (savedLocation) {
-            console.log('WP-kko EPUB Viewer: Displaying book...');
+            console.log('Superior e-Pub Viewer: Displaying book...');
             if (savedLocation) {
                 return self.rendition.display(savedLocation);
             }
@@ -254,21 +254,21 @@
         }).then(function () {
             // Apply skin background + auto text color into the epub iframe.
             self.applySkinToRendition();
-            console.log('WP-kko EPUB Viewer: Generating locations...');
+            console.log('Superior e-Pub Viewer: Generating locations...');
             return self.book.locations.generate(1024);
         }).then(function () {
             self.updatePageInfo();
         }).catch(function (err) {
             clearTimeout(loadingTimeout);
-            console.error('WP-kko EPUB Viewer: Failed to load book', err);
+            console.error('Superior e-Pub Viewer: Failed to load book', err);
             self.elements.loading.innerHTML = '<p style="color:red;">Failed to load EPUB file. Check the console for details.</p>';
         });
 
         // Build TOC + log spine for debugging navigation issues.
         this.book.loaded.navigation.then(function (nav) {
-            console.log('WP-kko EPUB Viewer: Spine items (' + self.book.spine.spineItems.length + '):',
+            console.log('Superior e-Pub Viewer: Spine items (' + self.book.spine.spineItems.length + '):',
                 self.book.spine.spineItems.map(function (s) { return s.href; }));
-            console.log('WP-kko EPUB Viewer: TOC items:', nav.toc.map(function (t) {
+            console.log('Superior e-Pub Viewer: TOC items:', nav.toc.map(function (t) {
                 return { label: t.label.trim(), href: t.href, id: t.id };
             }));
             self.buildTOC(nav.toc);
@@ -483,13 +483,13 @@
         var fragment = item.href.split('#')[1] || '';
         var tocLabel = item.label.trim();
 
-        console.log('WP-kko EPUB Viewer: TOC click, label:', JSON.stringify(tocLabel),
+        console.log('Superior e-Pub Viewer: TOC click, label:', JSON.stringify(tocLabel),
                      'raw href:', JSON.stringify(item.href), 'fragment:', JSON.stringify(fragment));
 
         // If the href has a real fragment (not empty), try direct navigation first.
         if (fragment) {
             this.rendition.display(href).then(function () {
-                console.log('WP-kko EPUB Viewer: TOC direct navigation OK');
+                console.log('Superior e-Pub Viewer: TOC direct navigation OK');
             }).catch(function () {
                 // Fragment navigation failed, fall back to heading match.
                 self.navigateByHeadingMatch(tocLabel);
@@ -508,7 +508,7 @@
         var self = this;
         var normalizedLabel = tocLabel.toLowerCase().replace(/\s+/g, ' ').trim();
 
-        console.log('WP-kko EPUB Viewer: Searching content for heading:', normalizedLabel);
+        console.log('Superior e-Pub Viewer: Searching content for heading:', normalizedLabel);
 
         // Search all spine sections for a matching heading.
         var found = false;
@@ -529,26 +529,26 @@
                             try {
                                 var cfi = spineItem.cfiFromElement(headings[i]);
                                 if (cfi) {
-                                    console.log('WP-kko EPUB Viewer: Found heading match, CFI:', cfi);
+                                    console.log('Superior e-Pub Viewer: Found heading match, CFI:', cfi);
                                     found = true;
                                     self.rendition.display(cfi);
                                     return;
                                 }
                             } catch (e) {
-                                console.warn('WP-kko EPUB Viewer: cfiFromElement failed:', e);
+                                console.warn('Superior e-Pub Viewer: cfiFromElement failed:', e);
                             }
                         }
                     }
                     spineItem.unload();
                 }).catch(function (err) {
-                    console.warn('WP-kko EPUB Viewer: Failed to load section for heading search:', err);
+                    console.warn('Superior e-Pub Viewer: Failed to load section for heading search:', err);
                 });
             });
         });
 
         chain.then(function () {
             if (!found) {
-                console.warn('WP-kko EPUB Viewer: No heading match found for:', tocLabel);
+                console.warn('Superior e-Pub Viewer: No heading match found for:', tocLabel);
                 self.showToast('Chapter not found in content');
             }
         });
@@ -659,7 +659,7 @@
         var results = [];
         var spine = this.book.spine;
 
-        console.log('WP-kko EPUB Viewer: Searching for "' + query + '" across', spine.spineItems.length, 'sections');
+        console.log('Superior e-Pub Viewer: Searching for "' + query + '" across', spine.spineItems.length, 'sections');
 
         // Show searching indicator.
         var searching = document.createElement('li');
@@ -689,7 +689,7 @@
                             }
                         }
                     } catch (e) {
-                        console.warn('WP-kko EPUB Viewer: Section.find() failed, using fallback', e);
+                        console.warn('Superior e-Pub Viewer: Section.find() failed, using fallback', e);
                     }
 
                     // Fallback: manual text search (no CFI — can only navigate to section).
@@ -718,7 +718,7 @@
                     }
                     item.unload();
                 }).catch(function (err) {
-                    console.warn('WP-kko EPUB Viewer: Search failed for section', item.href, err);
+                    console.warn('Superior e-Pub Viewer: Search failed for section', item.href, err);
                 });
             })
         );
@@ -726,7 +726,7 @@
         searchPromise.then(function () {
             self.elements.searchResults.innerHTML = '';
 
-            console.log('WP-kko EPUB Viewer: Search complete, found', results.length, 'results',
+            console.log('Superior e-Pub Viewer: Search complete, found', results.length, 'results',
                         '(CFI:', results.filter(function (r) { return !!r.cfi; }).length + ')');
 
             if (!results.length) {
@@ -746,7 +746,7 @@
                     e.preventDefault();
                     // Navigate by CFI (exact position) if available, else by section href.
                     var target = r.cfi || r.href;
-                    console.log('WP-kko EPUB Viewer: Search result click, target:', target);
+                    console.log('Superior e-Pub Viewer: Search result click, target:', target);
                     self.rendition.display(target);
                     self.elements.searchPanel.style.display = 'none';
                 });
@@ -754,7 +754,7 @@
                 self.elements.searchResults.appendChild(li);
             });
         }).catch(function (err) {
-            console.error('WP-kko EPUB Viewer: Search error', err);
+            console.error('Superior e-Pub Viewer: Search error', err);
             self.elements.searchResults.innerHTML = '';
             var li = document.createElement('li');
             li.textContent = 'Search failed. Please try again.';

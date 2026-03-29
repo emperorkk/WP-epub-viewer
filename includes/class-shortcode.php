@@ -31,7 +31,7 @@ class WPKko_EPUB_Shortcode {
         $require_login = WPKko_EPUB_Settings::get( 'require_login', false );
         if ( $require_login && ! is_user_logged_in() ) {
             return '<p class="wpkko-epub-login-notice">' .
-                   esc_html__( 'Please log in to view this content.', 'wp-kko-epub-viewer' ) .
+                   esc_html__( 'Please log in to view this content.', 'superior-e-pub-viewer' ) .
                    '</p>';
         }
 
@@ -52,7 +52,7 @@ class WPKko_EPUB_Shortcode {
 
         if ( empty( $src ) ) {
             return '<p class="wpkko-epub-error">' .
-                   esc_html__( 'No EPUB source provided.', 'wp-kko-epub-viewer' ) .
+                   esc_html__( 'No EPUB source provided.', 'superior-e-pub-viewer' ) .
                    '</p>';
         }
 
@@ -75,39 +75,39 @@ class WPKko_EPUB_Shortcode {
              class="wpkko-epub-viewer wpkko-skin-<?php echo esc_attr( $skin ); ?>"
              data-epub-src="<?php echo esc_url( $src ); ?>"
              data-epub-skin="<?php echo esc_attr( $skin ); ?>"
-             style="width:<?php echo $width; ?>;height:<?php echo $height; ?>;">
+             style="width:<?php echo esc_attr( $width ); ?>;height:<?php echo esc_attr( $height ); ?>;">
 
             <!-- Toolbar -->
             <div class="wpkko-toolbar">
-                <button class="wpkko-btn wpkko-btn-toc" title="<?php esc_attr_e( 'Table of Contents', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-toc" title="<?php esc_attr_e( 'Table of Contents', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#9776;</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-prev" title="<?php esc_attr_e( 'Previous Page', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-prev" title="<?php esc_attr_e( 'Previous Page', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#9664;</span>
                 </button>
                 <span class="wpkko-page-info"></span>
-                <button class="wpkko-btn wpkko-btn-next" title="<?php esc_attr_e( 'Next Page', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-next" title="<?php esc_attr_e( 'Next Page', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#9654;</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-font-down" title="<?php esc_attr_e( 'Decrease Font Size', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-font-down" title="<?php esc_attr_e( 'Decrease Font Size', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">A-</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-font-up" title="<?php esc_attr_e( 'Increase Font Size', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-font-up" title="<?php esc_attr_e( 'Increase Font Size', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">A+</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-bookmark" title="<?php esc_attr_e( 'Bookmark', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-bookmark" title="<?php esc_attr_e( 'Bookmark', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#9733;</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-search" title="<?php esc_attr_e( 'Search', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-search" title="<?php esc_attr_e( 'Search', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#128269;</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-text-color" title="<?php esc_attr_e( 'Cycle Text Color', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-text-color" title="<?php esc_attr_e( 'Cycle Text Color', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#x1D00;</span>
                 </button>
-                <button class="wpkko-btn wpkko-btn-fullscreen" title="<?php esc_attr_e( 'Fullscreen', 'wp-kko-epub-viewer' ); ?>">
+                <button class="wpkko-btn wpkko-btn-fullscreen" title="<?php esc_attr_e( 'Fullscreen', 'superior-e-pub-viewer' ); ?>">
                     <span class="wpkko-icon">&#x26F6;</span>
                 </button>
-                <select class="wpkko-skin-switcher" title="<?php esc_attr_e( 'Change Skin', 'wp-kko-epub-viewer' ); ?>">
+                <select class="wpkko-skin-switcher" title="<?php esc_attr_e( 'Change Skin', 'superior-e-pub-viewer' ); ?>">
                     <?php foreach ( $skins as $slug => $label ) : ?>
                         <option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $skin, $slug ); ?>>
                             <?php echo esc_html( $label ); ?>
@@ -119,7 +119,7 @@ class WPKko_EPUB_Shortcode {
             <!-- TOC Sidebar -->
             <div class="wpkko-toc-sidebar" style="display:none;">
                 <div class="wpkko-toc-header">
-                    <strong><?php esc_html_e( 'Table of Contents', 'wp-kko-epub-viewer' ); ?></strong>
+                    <strong><?php esc_html_e( 'Table of Contents', 'superior-e-pub-viewer' ); ?></strong>
                     <button class="wpkko-btn wpkko-btn-toc-close">&times;</button>
                 </div>
                 <ul class="wpkko-toc-list"></ul>
@@ -128,8 +128,8 @@ class WPKko_EPUB_Shortcode {
             <!-- Search Panel -->
             <div class="wpkko-search-panel" style="display:none;">
                 <div class="wpkko-search-header">
-                    <input type="text" class="wpkko-search-input" placeholder="<?php esc_attr_e( 'Search...', 'wp-kko-epub-viewer' ); ?>">
-                    <button class="wpkko-btn wpkko-btn-search-go" title="<?php esc_attr_e( 'Search', 'wp-kko-epub-viewer' ); ?>">&#128269;</button>
+                    <input type="text" class="wpkko-search-input" placeholder="<?php esc_attr_e( 'Search...', 'superior-e-pub-viewer' ); ?>">
+                    <button class="wpkko-btn wpkko-btn-search-go" title="<?php esc_attr_e( 'Search', 'superior-e-pub-viewer' ); ?>">&#128269;</button>
                     <button class="wpkko-btn wpkko-btn-search-close">&times;</button>
                 </div>
                 <ul class="wpkko-search-results"></ul>
@@ -138,7 +138,7 @@ class WPKko_EPUB_Shortcode {
             <!-- Bookmarks Panel -->
             <div class="wpkko-bookmarks-panel" style="display:none;">
                 <div class="wpkko-bookmarks-header">
-                    <strong><?php esc_html_e( 'Bookmarks', 'wp-kko-epub-viewer' ); ?></strong>
+                    <strong><?php esc_html_e( 'Bookmarks', 'superior-e-pub-viewer' ); ?></strong>
                     <button class="wpkko-btn wpkko-btn-bookmarks-close">&times;</button>
                 </div>
                 <ul class="wpkko-bookmarks-list"></ul>
@@ -150,7 +150,7 @@ class WPKko_EPUB_Shortcode {
             <!-- Loading spinner -->
             <div class="wpkko-loading">
                 <div class="wpkko-spinner"></div>
-                <p><?php esc_html_e( 'Loading book...', 'wp-kko-epub-viewer' ); ?></p>
+                <p><?php esc_html_e( 'Loading book...', 'superior-e-pub-viewer' ); ?></p>
             </div>
         </div>
         <?php

@@ -26,8 +26,8 @@ class WPKko_EPUB_Settings {
 
     public function add_menu() {
         add_options_page(
-            __( 'WP-kko EPUB Viewer', 'wp-kko-epub-viewer' ),
-            __( 'EPUB Viewer', 'wp-kko-epub-viewer' ),
+            __( 'Superior e-Pub Viewer', 'superior-e-pub-viewer' ),
+            __( 'EPUB Viewer', 'superior-e-pub-viewer' ),
             'manage_options',
             'wpkko-epub-viewer',
             array( $this, 'render_page' )
@@ -46,14 +46,14 @@ class WPKko_EPUB_Settings {
 
         add_settings_section(
             'wpkko_epub_general',
-            __( 'General Settings', 'wp-kko-epub-viewer' ),
+            __( 'General Settings', 'superior-e-pub-viewer' ),
             '__return_false',
             'wpkko-epub-viewer'
         );
 
         add_settings_field(
             'require_login',
-            __( 'Require Login', 'wp-kko-epub-viewer' ),
+            __( 'Require Login', 'superior-e-pub-viewer' ),
             array( $this, 'field_require_login' ),
             'wpkko-epub-viewer',
             'wpkko_epub_general'
@@ -61,7 +61,7 @@ class WPKko_EPUB_Settings {
 
         add_settings_field(
             'default_skin',
-            __( 'Default Skin', 'wp-kko-epub-viewer' ),
+            __( 'Default Skin', 'superior-e-pub-viewer' ),
             array( $this, 'field_default_skin' ),
             'wpkko-epub-viewer',
             'wpkko_epub_general'
@@ -87,7 +87,7 @@ class WPKko_EPUB_Settings {
         ?>
         <label>
             <input type="checkbox" name="wpkko_epub_settings[require_login]" value="1" <?php checked( $val ); ?>>
-            <?php esc_html_e( 'Only show EPUB viewers to logged-in users', 'wp-kko-epub-viewer' ); ?>
+            <?php esc_html_e( 'Only show EPUB viewers to logged-in users', 'superior-e-pub-viewer' ); ?>
         </label>
         <?php
     }
@@ -110,7 +110,7 @@ class WPKko_EPUB_Settings {
     public function render_page() {
         ?>
         <div class="wrap">
-            <h1><?php esc_html_e( 'WP-kko EPUB Viewer Settings', 'wp-kko-epub-viewer' ); ?></h1>
+            <h1><?php esc_html_e( 'Superior e-Pub Viewer Settings', 'superior-e-pub-viewer' ); ?></h1>
             <form method="post" action="options.php">
                 <?php
                 settings_fields( 'wpkko_epub_group' );
@@ -120,14 +120,14 @@ class WPKko_EPUB_Settings {
             </form>
 
             <hr>
-            <h2><?php esc_html_e( 'Shortcode Usage', 'wp-kko-epub-viewer' ); ?></h2>
+            <h2><?php esc_html_e( 'Shortcode Usage', 'superior-e-pub-viewer' ); ?></h2>
             <p><code>[epub_viewer src="URL_OR_MEDIA_ID" skin="ocean-breeze" width="100%" height="600px"]</code></p>
-            <p><?php esc_html_e( 'Parameters:', 'wp-kko-epub-viewer' ); ?></p>
+            <p><?php esc_html_e( 'Parameters:', 'superior-e-pub-viewer' ); ?></p>
             <ul style="list-style:disc;margin-left:20px;">
-                <li><strong>src</strong> — <?php esc_html_e( 'EPUB file URL or WordPress Media Library attachment ID', 'wp-kko-epub-viewer' ); ?></li>
-                <li><strong>skin</strong> — <?php esc_html_e( 'Skin slug (see dropdown above for options)', 'wp-kko-epub-viewer' ); ?></li>
-                <li><strong>width</strong> — <?php esc_html_e( 'Container width (default: 100%)', 'wp-kko-epub-viewer' ); ?></li>
-                <li><strong>height</strong> — <?php esc_html_e( 'Container height (default: 600px)', 'wp-kko-epub-viewer' ); ?></li>
+                <li><strong>src</strong> — <?php esc_html_e( 'EPUB file URL or WordPress Media Library attachment ID', 'superior-e-pub-viewer' ); ?></li>
+                <li><strong>skin</strong> — <?php esc_html_e( 'Skin slug (see dropdown above for options)', 'superior-e-pub-viewer' ); ?></li>
+                <li><strong>width</strong> — <?php esc_html_e( 'Container width (default: 100%)', 'superior-e-pub-viewer' ); ?></li>
+                <li><strong>height</strong> — <?php esc_html_e( 'Container height (default: 600px)', 'superior-e-pub-viewer' ); ?></li>
             </ul>
         </div>
         <?php
@@ -135,7 +135,7 @@ class WPKko_EPUB_Settings {
 
     public function action_links( $links ) {
         $url  = admin_url( 'options-general.php?page=wpkko-epub-viewer' );
-        $link = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'wp-kko-epub-viewer' ) . '</a>';
+        $link = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'superior-e-pub-viewer' ) . '</a>';
         array_unshift( $links, $link );
         return $links;
     }
@@ -145,16 +145,16 @@ class WPKko_EPUB_Settings {
      */
     public static function get_skins() {
         return array(
-            'ocean-breeze'    => __( 'Ocean Breeze (Teal & Blue)', 'wp-kko-epub-viewer' ),
-            'royal-gold'      => __( 'Royal Gold (Gold & Black)', 'wp-kko-epub-viewer' ),
-            'berry-bloom'     => __( 'Berry Bloom (Pink & Purple)', 'wp-kko-epub-viewer' ),
-            'midnight'        => __( 'Midnight (Dark Navy & Silver)', 'wp-kko-epub-viewer' ),
-            'forest'          => __( 'Forest (Dark Green & Cream)', 'wp-kko-epub-viewer' ),
-            'sunset'          => __( 'Sunset (Orange & Dark Red)', 'wp-kko-epub-viewer' ),
-            'arctic'          => __( 'Arctic (White & Ice Blue)', 'wp-kko-epub-viewer' ),
-            'charcoal'        => __( 'Charcoal (Dark Gray & Amber)', 'wp-kko-epub-viewer' ),
-            'lavender-dream'  => __( 'Lavender Dream (Lavender & Soft White)', 'wp-kko-epub-viewer' ),
-            'classic'         => __( 'Classic (Black & White)', 'wp-kko-epub-viewer' ),
+            'ocean-breeze'    => __( 'Ocean Breeze (Teal & Blue)', 'superior-e-pub-viewer' ),
+            'royal-gold'      => __( 'Royal Gold (Gold & Black)', 'superior-e-pub-viewer' ),
+            'berry-bloom'     => __( 'Berry Bloom (Pink & Purple)', 'superior-e-pub-viewer' ),
+            'midnight'        => __( 'Midnight (Dark Navy & Silver)', 'superior-e-pub-viewer' ),
+            'forest'          => __( 'Forest (Dark Green & Cream)', 'superior-e-pub-viewer' ),
+            'sunset'          => __( 'Sunset (Orange & Dark Red)', 'superior-e-pub-viewer' ),
+            'arctic'          => __( 'Arctic (White & Ice Blue)', 'superior-e-pub-viewer' ),
+            'charcoal'        => __( 'Charcoal (Dark Gray & Amber)', 'superior-e-pub-viewer' ),
+            'lavender-dream'  => __( 'Lavender Dream (Lavender & Soft White)', 'superior-e-pub-viewer' ),
+            'classic'         => __( 'Classic (Black & White)', 'superior-e-pub-viewer' ),
         );
     }
 

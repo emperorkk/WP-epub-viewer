@@ -14,7 +14,7 @@ class WPKko_Elementor_EPUB_Widget extends \Elementor\Widget_Base {
     }
 
     public function get_title() {
-        return __( 'EPUB Viewer', 'wp-kko-epub-viewer' );
+        return __( 'EPUB Viewer', 'superior-e-pub-viewer' );
     }
 
     public function get_icon() {
@@ -33,29 +33,29 @@ class WPKko_Elementor_EPUB_Widget extends \Elementor\Widget_Base {
 
         // --- Content Tab ---
         $this->start_controls_section( 'section_content', array(
-            'label' => __( 'EPUB Source', 'wp-kko-epub-viewer' ),
+            'label' => __( 'EPUB Source', 'superior-e-pub-viewer' ),
             'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
         ) );
 
         $this->add_control( 'source_type', array(
-            'label'   => __( 'Source Type', 'wp-kko-epub-viewer' ),
+            'label'   => __( 'Source Type', 'superior-e-pub-viewer' ),
             'type'    => \Elementor\Controls_Manager::SELECT,
             'default' => 'upload',
             'options' => array(
-                'upload' => __( 'Media Library', 'wp-kko-epub-viewer' ),
-                'url'    => __( 'External URL', 'wp-kko-epub-viewer' ),
+                'upload' => __( 'Media Library', 'superior-e-pub-viewer' ),
+                'url'    => __( 'External URL', 'superior-e-pub-viewer' ),
             ),
         ) );
 
         $this->add_control( 'epub_file', array(
-            'label'      => __( 'Upload EPUB', 'wp-kko-epub-viewer' ),
+            'label'      => __( 'Upload EPUB', 'superior-e-pub-viewer' ),
             'type'       => \Elementor\Controls_Manager::MEDIA,
             'media_types' => array( 'application/epub+zip', 'application/octet-stream' ),
             'condition'  => array( 'source_type' => 'upload' ),
         ) );
 
         $this->add_control( 'epub_url', array(
-            'label'       => __( 'EPUB URL', 'wp-kko-epub-viewer' ),
+            'label'       => __( 'EPUB URL', 'superior-e-pub-viewer' ),
             'type'        => \Elementor\Controls_Manager::URL,
             'placeholder' => 'https://example.com/book.epub',
             'condition'   => array( 'source_type' => 'url' ),
@@ -65,21 +65,21 @@ class WPKko_Elementor_EPUB_Widget extends \Elementor\Widget_Base {
 
         // --- Appearance Tab ---
         $this->start_controls_section( 'section_appearance', array(
-            'label' => __( 'Appearance', 'wp-kko-epub-viewer' ),
+            'label' => __( 'Appearance', 'superior-e-pub-viewer' ),
             'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
         ) );
 
         $skin_options = WPKko_EPUB_Settings::get_skins();
 
         $this->add_control( 'skin', array(
-            'label'   => __( 'Skin', 'wp-kko-epub-viewer' ),
+            'label'   => __( 'Skin', 'superior-e-pub-viewer' ),
             'type'    => \Elementor\Controls_Manager::SELECT,
             'default' => WPKko_EPUB_Settings::get( 'default_skin', 'ocean-breeze' ),
             'options' => $skin_options,
         ) );
 
         $this->add_responsive_control( 'viewer_height', array(
-            'label'      => __( 'Height', 'wp-kko-epub-viewer' ),
+            'label'      => __( 'Height', 'superior-e-pub-viewer' ),
             'type'       => \Elementor\Controls_Manager::SLIDER,
             'size_units' => array( 'px', 'vh' ),
             'range'      => array(

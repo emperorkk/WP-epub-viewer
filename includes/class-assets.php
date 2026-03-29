@@ -32,10 +32,10 @@ class WPKko_EPUB_Assets {
         }
         self::$enqueued = true;
 
-        // JSZip — required by epub.js to unzip EPUB files.
+        // JSZip — required by epub.js to unzip EPUB files (self-hosted).
         wp_enqueue_script(
             'jszip',
-            'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+            WPKKO_EPUB_PLUGIN_URL . 'assets/js/vendor/jszip.min.js',
             array(),
             '3.10.1',
             true
@@ -63,13 +63,13 @@ class WPKko_EPUB_Assets {
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
             'nonce'   => wp_create_nonce( 'wpkko_epub_nonce' ),
             'i18n'    => array(
-                'loading'        => __( 'Loading book...', 'wp-kko-epub-viewer' ),
-                'error'          => __( 'Failed to load EPUB file.', 'wp-kko-epub-viewer' ),
-                'noResults'      => __( 'No results found.', 'wp-kko-epub-viewer' ),
-                'bookmarkAdded'  => __( 'Bookmark added!', 'wp-kko-epub-viewer' ),
-                'bookmarkExists' => __( 'Already bookmarked.', 'wp-kko-epub-viewer' ),
-                'page'           => __( 'Page', 'wp-kko-epub-viewer' ),
-                'of'             => __( 'of', 'wp-kko-epub-viewer' ),
+                'loading'        => __( 'Loading book...', 'superior-e-pub-viewer' ),
+                'error'          => __( 'Failed to load EPUB file.', 'superior-e-pub-viewer' ),
+                'noResults'      => __( 'No results found.', 'superior-e-pub-viewer' ),
+                'bookmarkAdded'  => __( 'Bookmark added!', 'superior-e-pub-viewer' ),
+                'bookmarkExists' => __( 'Already bookmarked.', 'superior-e-pub-viewer' ),
+                'page'           => __( 'Page', 'superior-e-pub-viewer' ),
+                'of'             => __( 'of', 'superior-e-pub-viewer' ),
             ),
         ) );
 
