@@ -204,18 +204,14 @@
             spread: 'auto'
         });
 
-        // Resize rendition when the container resizes (accounting for zoom factor).
+        // Resize rendition when the container resizes.
         var resizeTimer;
         var ro = new ResizeObserver(function () {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function () {
                 if (self.rendition) {
                     var d = self.getReaderDimensions();
-                    var factor = self.fontSize / 100;
-                    self.rendition.resize(
-                        Math.floor(d.width / factor),
-                        Math.floor(d.height / factor)
-                    );
+                    self.rendition.resize(d.width, d.height);
                 }
             }, 150);
         });
@@ -303,8 +299,12 @@
     // --- Skin → epub iframe ---
 
     /**
-     * Build CSS to inject into the epub iframe for skin colors.
-     * Font scaling is handled separately via container zoom (not iframe CSS).
+     * Build CSS to inject into the epub iframe for skin colors + font size.
+     *
+     * Font scaling forces all text elements to use relative em units (stripping
+     * any absolute px sizes from the EPUB stylesheet), then scales via html
+     * font-size. This preserves heading/body proportions while ensuring ALL
+     * text responds to the font-size control.
      */
     EPUBReader.prototype._buildSkinCss = function () {
         var colorRules = [];
@@ -318,6 +318,21 @@
         }
         if (colorRules.length) {
             css += 'body, body * { ' + colorRules.join('; ') + '; }\n';
+        }
+
+        // Font scaling: set root font-size and force all elements to relative units.
+        if (this.fontSize !== 100) {
+            css += 'html { font-size: ' + this.fontSize + '% !important; }\n';
+            // Reset all elements to 1em (inherit from parent) so px sizes don't block scaling.
+            css += 'body * { font-size: 1em !important; }\n';
+            // Restore heading proportions (higher specificity than body *).
+            css += 'body h1 { font-size: 2em !important; }\n';
+            css += 'body h2 { font-size: 1.5em !important; }\n';
+            css += 'body h3 { font-size: 1.17em !important; }\n';
+            css += 'body h4 { font-size: 1em !important; }\n';
+            css += 'body h5 { font-size: 0.83em !important; }\n';
+            css += 'body h6 { font-size: 0.67em !important; }\n';
+            css += 'body small, body sub, body sup { font-size: 0.8em !important; }\n';
         }
         return css;
     };
@@ -457,94 +472,97 @@
     /**
      * Navigate to a TOC item.
      *
-     * For single-spine EPUBs (all content in one file), the TOC hrefs
-     * may all point to the same file. We must use the FULL href including
-     * any fragment (#anchor) so epub.js can scroll to the right position.
-     * If that fails, we try to resolve the canonical URL via book.canonical().
+     * For single-spine EPUBs where TOC hrefs have no meaningful fragment IDs
+     * (e.g. all entries are "file.xhtml#"), we fall back to scanning the
+     * content for headings that match the TOC label, generate a CFI, and
+     * navigate by CFI for exact positioning.
      */
     EPUBReader.prototype.navigateToTocItem = function (item) {
         var self = this;
-        // Use raw href — only strip bare trailing '#' (no fragment id).
         var href = item.href.replace(/#$/, '');
+        var fragment = item.href.split('#')[1] || '';
+        var tocLabel = item.label.trim();
 
-        console.log('WP-kko EPUB Viewer: TOC click, raw href:', JSON.stringify(item.href),
-                     'cleaned:', href, 'id:', item.id);
+        console.log('WP-kko EPUB Viewer: TOC click, label:', JSON.stringify(tocLabel),
+                     'raw href:', JSON.stringify(item.href), 'fragment:', JSON.stringify(fragment));
 
-        // Primary: try the href as-is (may include fragment like file.xhtml#chapter2).
-        this.rendition.display(href).then(function () {
-            console.log('WP-kko EPUB Viewer: TOC navigation OK for:', href);
-        }).catch(function (err) {
-            console.warn('WP-kko EPUB Viewer: TOC display() rejected for:', href, err);
+        // If the href has a real fragment (not empty), try direct navigation first.
+        if (fragment) {
+            this.rendition.display(href).then(function () {
+                console.log('WP-kko EPUB Viewer: TOC direct navigation OK');
+            }).catch(function () {
+                // Fragment navigation failed, fall back to heading match.
+                self.navigateByHeadingMatch(tocLabel);
+            });
+        } else {
+            // No fragment — scan content for matching heading.
+            this.navigateByHeadingMatch(tocLabel);
+        }
+    };
 
-            // Fallback: try to resolve via spine.
-            var hrefBase = href.split('#')[0];
-            var fragment = href.split('#')[1] || '';
+    /**
+     * Find a heading in the EPUB content that matches the TOC label text,
+     * generate a CFI for it, and navigate there.
+     */
+    EPUBReader.prototype.navigateByHeadingMatch = function (tocLabel) {
+        var self = this;
+        var normalizedLabel = tocLabel.toLowerCase().replace(/\s+/g, ' ').trim();
 
-            // Find matching spine item by partial path.
-            var spineItems = self.book.spine.spineItems;
-            for (var i = 0; i < spineItems.length; i++) {
-                var sh = spineItems[i].href;
-                if (sh === hrefBase || sh.indexOf(hrefBase) !== -1 || hrefBase.indexOf(sh) !== -1) {
-                    var target = fragment ? sh + '#' + fragment : sh;
-                    console.log('WP-kko EPUB Viewer: Retrying with spine href:', target);
-                    return self.rendition.display(target);
-                }
+        console.log('WP-kko EPUB Viewer: Searching content for heading:', normalizedLabel);
+
+        // Search all spine sections for a matching heading.
+        var found = false;
+        var chain = Promise.resolve();
+
+        this.book.spine.spineItems.forEach(function (spineItem) {
+            chain = chain.then(function () {
+                if (found) return;
+                return spineItem.load(self.book.load.bind(self.book)).then(function (el) {
+                    if (found || !el || !el.querySelectorAll) return;
+
+                    var headings = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    for (var i = 0; i < headings.length; i++) {
+                        var headingText = headings[i].textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+                        if (headingText === normalizedLabel || headingText.indexOf(normalizedLabel) !== -1 ||
+                            normalizedLabel.indexOf(headingText) !== -1) {
+                            // Found matching heading — generate CFI.
+                            try {
+                                var cfi = spineItem.cfiFromElement(headings[i]);
+                                if (cfi) {
+                                    console.log('WP-kko EPUB Viewer: Found heading match, CFI:', cfi);
+                                    found = true;
+                                    self.rendition.display(cfi);
+                                    return;
+                                }
+                            } catch (e) {
+                                console.warn('WP-kko EPUB Viewer: cfiFromElement failed:', e);
+                            }
+                        }
+                    }
+                    spineItem.unload();
+                }).catch(function (err) {
+                    console.warn('WP-kko EPUB Viewer: Failed to load section for heading search:', err);
+                });
+            });
+        });
+
+        chain.then(function () {
+            if (!found) {
+                console.warn('WP-kko EPUB Viewer: No heading match found for:', tocLabel);
+                self.showToast('Chapter not found in content');
             }
-
-            // Fallback: try by id.
-            if (item.id) {
-                var section = self.book.spine.get(item.id);
-                if (section) {
-                    var idTarget = fragment ? section.href + '#' + fragment : section.href;
-                    console.log('WP-kko EPUB Viewer: Retrying with spine id:', idTarget);
-                    return self.rendition.display(idTarget);
-                }
-            }
-
-            console.error('WP-kko EPUB Viewer: All TOC attempts failed for:', href);
         });
     };
 
     EPUBReader.prototype.changeFontSize = function (delta) {
         this.fontSize = Math.max(50, Math.min(200, this.fontSize + delta));
-        this._applyFontZoom();
-        this.showToast('Font: ' + this.fontSize + '%');
-    };
-
-    /**
-     * Apply font scaling by zooming the epub.js container element (in the
-     * parent document, NOT inside the iframe). This avoids viewport/layout
-     * conflicts with epub.js column calculations.
-     *
-     * Strategy: resize rendition to (width/factor, height/factor), then
-     * zoom the container back up. epub.js lays out at the smaller size
-     * (reflowing text for narrower width = effectively larger text), and
-     * CSS zoom scales the result to fill the real reader area.
-     */
-    EPUBReader.prototype._applyFontZoom = function () {
-        if (!this.rendition) return;
-        var factor = this.fontSize / 100;
-        var d = this.getReaderDimensions();
-        var compensatedW = Math.floor(d.width / factor);
-        var compensatedH = Math.floor(d.height / factor);
-
-        // Resize epub.js to compensated (smaller) dimensions.
-        this.rendition.resize(compensatedW, compensatedH);
-
-        // Apply CSS zoom on the epub.js container element to scale back up.
-        var epubContainer = this.elements.readerArea.querySelector('.epub-container');
-        if (!epubContainer) epubContainer = this.elements.readerArea.firstElementChild;
-        if (epubContainer) {
-            if (factor !== 1) {
-                epubContainer.style.zoom = factor;
-                epubContainer.style.MozTransform = 'scale(' + factor + ')';
-                epubContainer.style.MozTransformOrigin = 'top left';
-            } else {
-                epubContainer.style.zoom = '';
-                epubContainer.style.MozTransform = '';
-                epubContainer.style.MozTransformOrigin = '';
-            }
+        this._injectSkinCss();
+        // Re-render current page so epub.js recalculates pagination for new text size.
+        if (this.rendition && this.rendition.location) {
+            var cfi = this.rendition.location.start.cfi;
+            this.rendition.display(cfi);
         }
+        this.showToast('Font: ' + this.fontSize + '%');
     };
 
     EPUBReader.prototype.changeSkin = function (skin) {
