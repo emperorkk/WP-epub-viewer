@@ -66,8 +66,8 @@ class WPKko_EPUB_Shortcode {
         // Enqueue front-end assets.
         WPKko_EPUB_Assets::enqueue_frontend();
 
-        $width  = esc_attr( $atts['width'] );
-        $height = esc_attr( $atts['height'] );
+        $width  = $atts['width'];
+        $height = $atts['height'];
 
         ob_start();
         ?>
