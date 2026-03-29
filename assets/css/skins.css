@@ -203,9 +203,16 @@
 }
 
 .wpkko-search-input {
-    color: var(--wpkko-panel-text, #333);
-    background: var(--wpkko-panel-bg, #fff);
-    border-color: var(--wpkko-border, #ddd);
+    color: var(--wpkko-panel-text, #333) !important;
+    background: var(--wpkko-panel-bg, #fff) !important;
+    border-color: var(--wpkko-border, #ddd) !important;
+}
+
+.wpkko-search-results,
+.wpkko-search-results li,
+.wpkko-search-results a,
+.wpkko-no-results {
+    color: var(--wpkko-panel-text, #333) !important;
 }
 
 .wpkko-loading {
