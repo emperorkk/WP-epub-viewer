@@ -1,0 +1,24 @@
+name = "soft1-mcp"
+main = "src/index.js"
+compatibility_date = "2024-11-05"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "MCP_KV"
+id      = "a010adf9043148b7a9e3a06b5278f0c3"
+
+[vars]
+SOFT1_BASE_URL = "https://vlachosbros.oncloud.gr/s1services"
+SOFT1_APP_ID   = "1199"
+SOFT1_COMPANY  = "1000"
+SOFT1_BRANCH   = "1000"
+SOFT1_MODULE   = "0"
+SOFT1_REFID    = "264"
+
+BROWSER_CUSTOMER = ""
+BROWSER_SUPPLIER = ""
+BROWSER_SALDOC   = ""
+BROWSER_PURDOC   = ""
+BROWSER_VSALSTAT = ""
+BROWSER_VITESTAT = ""
+BROWSER_ITEM     = ""
